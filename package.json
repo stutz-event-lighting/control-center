@@ -1,0 +1,17 @@
+{
+  "name": "control-center",
+  "version": "1.0.0",
+  "description": "The electronics controller for the Stutz Event Lighting warehouse",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Patrik Stutz",
+  "license": "proprietary",
+  "dependencies": {
+    "async": "^0.9.0",
+    "byline": "^4.2.1",
+    "sonos": "^0.8.0",
+    "ws": "^0.7.1"
+  }
+}

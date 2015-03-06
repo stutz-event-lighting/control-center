@@ -1,0 +1,89 @@
+extends ../../../../lib/views/base.jade
+
+append body
+    .container
+        if this.client.state == "connected"
+            .row
+                h4 Lager Licht
+                .col-xs-6
+                    .btn-toolbar
+                        button.btn.btn-default(onClick=this.mainlightOn) Voll
+                        button.btn.btn-default(onClick=this.mainlightHalfOn) Halb
+                        button.btn.btn-default(onClick=this.mainlightOff) Aus
+                .col-xs-6
+                    span= this.client.devices.mainlight.state.status
+            .row
+                h4 Storen
+                .col-xs-6
+                    .btn-toolbar
+                        button.btn.btn-default(onClick=this.shuttersUp) Hoch
+                        button.btn.btn-default(onClick=this.shuttersDown) Runter
+                        button.btn.btn-default(onClick=this.shuttersStop) Stop
+                .col-xs-6
+                    span= this.client.devices.shutters.state.status
+            .row
+                h4 Rolltor
+                .col-xs-6
+                    .btn-toolbar
+                        button.btn.btn-default(onClick=this.gateOpen) Öffnen
+                        button.btn.btn-default(onClick=this.gateClose) Schliessen
+                        button.btn.btn-default(onClick=this.gateStop) Stoppen
+                .col-xs-6
+                    span= this.client.devices.gate.state.state
+                
+        else if this.client.state == "connecting"
+            span Connecting...
+        else
+            span Disconnected!
+main.
+    var DeviceClient = require("../client/index.js");
+    
+    exports.getInitialState = function(){
+        return {};
+    }
+    
+    exports.componentWillMount = function(){
+        this.client = new DeviceClient();
+        this.client.on("change",function(){
+            console.log(this.client.state)
+            this.update();
+        }.bind(this))
+    }
+    
+    exports.componentWillUnmount = function(){
+        this.client.disconnect();
+    }
+    
+    exports.mainlightOn = function(){
+        this.client.devices.mainlight.turnOn();
+    }
+    exports.mainlightHalfOn = function(){
+        this.client.devices.mainlight.turnHalfOn();
+    }
+    exports.mainlightOff = function(){
+        this.client.devices.mainlight.turnOff();
+    }
+    
+    exports.shuttersUp = function(){
+        this.client.devices.shutters.moveUp();
+    }
+    
+    exports.shuttersDown = function(){
+        this.client.devices.shutters.moveDown();
+    }
+    
+    exports.shuttersStop = function(){
+        this.client.devices.shutters.stop();
+    }
+    
+    exports.gateOpen = function(){
+        this.client.devices.gate.open();
+    }
+    
+    exports.gateClose = function(){
+        this.client.devices.gate.close();
+    }
+    
+    exports.gateStop = function(){
+        this.client.devices.gate.stop();
+    }
