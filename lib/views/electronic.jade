@@ -30,6 +30,31 @@ append body
                         button.btn.btn-default(onClick=this.gateStop) Stoppen
                 .col-xs-6
                     span= this.client.devices.gate.state.state
+            .row
+                h4 Büro Lampen
+                .btn-toolbar
+                    each scene in this.client.devices.officelight.state.scenes
+                        .btn-group
+                            button.btn.btn-default(onClick=this.setScene(scene.id))= scene.name
+                            button.btn.btn-default(onClick=this.deleteScene(scene.id))
+                                i.glyphicon.glyphicon-remove
+                    button.btn.btn-primary(onClick=this.createScene) Neue Scene
+            if this.props.createscene
+                .modal(style="display:block").fade.in
+                    .modal-backdrop(style="bottom:0px;display:block").fade.in
+                    .modal-dialog
+                        .modal-content
+                            .modal-header
+                                h2 Scene erstellen
+                            .modal-body
+                                .form-horizontal
+                                    .form-group
+                                        label.col-lg-2.control-label Name
+                                        .col-lg-10
+                                            input.form-control(type="text" value=this.props.createscene.name onChange=this.validateCreateSceneName.bind(this))
+                            .modal-footer
+                                button.btn.btn-default(onClick=this.cancelCreateScene) Abbrechen
+                                button.btn.btn-primary(onClick=this.confirmCreateScene) Erfassen
                 
         else if this.client.state == "connecting"
             span Connecting...
@@ -86,4 +111,35 @@ main.
     
     exports.gateStop = function(){
         this.client.devices.gate.stop();
+    }
+    
+    exports.createScene = function(){
+        this.props.createscene = {name:""};
+        this.update();
+    }
+    exports.validateCreateSceneName = function(e){
+        this.props.createscene.name = e.target.value;
+        this.update();
+    }
+    exports.cancelCreateScene = function(){
+        delete this.props.createscene;
+        this.update();
+    }
+    exports.confirmCreateScene = function(){
+        var name = this.props.createscene.name;
+        delete this.props.createscene;
+        this.update();
+        this.client.devices.officelight.createScene(name);
+    }
+    
+    exports.setScene = function(id){
+        return function(){
+            this.client.devices.officelight.setScene(id);
+        }.bind(this)
+    }
+    
+    exports.deleteScene = function(id){
+        return function(){
+            this.client.devices.officelight.deleteScene(id);
+        }.bind(this)
     }
