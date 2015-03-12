@@ -1,6 +1,6 @@
 var fs = require("fs");
-var electronic = require("./lib/index.js");
+var Controller = require("./lib/controller.js");
 var config = JSON.parse(fs.readFileSync("./config.json"));
 
-var controller = new electronic.Controller(config);
+var controller = new Controller(config);
 controller.start();
