@@ -55,6 +55,9 @@ append body
                             .modal-footer
                                 button.btn.btn-default(onClick=this.cancelCreateScene) Abbrechen
                                 button.btn.btn-primary(onClick=this.confirmCreateScene) Erfassen
+            .row
+                h4 Super geheime Geheimfunktion
+                .btn.btn-danger(onClick=this.startTicTacToe) Diesen Button unter keinen Umständen drücken!
                 
         else if this.client.state == "connecting"
             span Connecting...
@@ -142,4 +145,8 @@ main.
         return function(){
             this.client.devices.officelight.deleteScene(id);
         }.bind(this)
+    }
+    
+    exports.startTicTacToe = function(){
+        visit("/tictactoe");
     }
