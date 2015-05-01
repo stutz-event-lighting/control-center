@@ -2,7 +2,9 @@ extends ../../../../lib/views/base.jade
 
 append body
     .container
-        if this.client.state == "connected"
+        if this.client.state != "connected"
+            .alert.alert-warning= this.client.state=="connecting"?"Verbinung wird hergestellt...":"Verbindung verloren. Erneut verbinden in "+this.client.timeUntilReconnect+"s..."
+        if client.hasPermission("mainlight")
             .row
                 h4 Lager Licht
                 .col-xs-6
@@ -11,7 +13,9 @@ append body
                         button.btn.btn-default(onClick=this.mainlightHalfOn) Halb
                         button.btn.btn-default(onClick=this.mainlightOff) Aus
                 .col-xs-6
-                    span= this.client.devices.mainlight.state.status
+                    span= this.client.devices.mainlight.state.status||"Unbekannt"
+                    
+        if client.hasPermission("shutters")
             .row
                 h4 Storen
                 .col-xs-6
@@ -20,7 +24,8 @@ append body
                         button.btn.btn-default(onClick=this.shuttersDown) Runter
                         button.btn.btn-default(onClick=this.shuttersStop) Stop
                 .col-xs-6
-                    span= this.client.devices.shutters.state.status
+                    span= this.client.devices.shutters.state.status||"Unbekannt"
+        if client.hasPermission("gate")
             .row
                 h4 Rolltor
                 .col-xs-6
@@ -29,7 +34,8 @@ append body
                         button.btn.btn-default(onClick=this.gateClose) Schliessen
                         button.btn.btn-default(onClick=this.gateStop) Stoppen
                 .col-xs-6
-                    span= this.client.devices.gate.state.state
+                    span= this.client.devices.gate.state.state||"Unbekannt"
+        if client.hasPermission("officelight")
             .row
                 h4 Büro Lampen
                 .btn-toolbar
@@ -55,31 +61,28 @@ append body
                             .modal-footer
                                 button.btn.btn-default(onClick=this.cancelCreateScene) Abbrechen
                                 button.btn.btn-primary(onClick=this.confirmCreateScene) Erfassen
+        if client.hasPermission("tictactoe")
             .row
                 h4 Super geheime Geheimfunktion
                 .btn.btn-danger(onClick=this.startTicTacToe) Diesen Button unter keinen Umständen drücken!
-                
-        else if this.client.state == "connecting"
-            span Connecting...
-        else
-            span Disconnected!
-main.
+script.
     var DeviceClient = require("../client/index.js");
-    
-    exports.getInitialState = function(){
-        return {};
-    }
+    var client = require("boxify/lib/client.js");
     
     exports.componentWillMount = function(){
         this.client = new DeviceClient();
         this.client.on("change",function(){
-            console.log(this.client.state)
             this.update();
         }.bind(this))
+        this.client.listen();
+    }
+    
+    exports.componentDidMount = function(){
+        if(!client.session) visit("/login");
     }
     
     exports.componentWillUnmount = function(){
-        this.client.disconnect();
+        if(this.client) this.client.disconnect();
     }
     
     exports.mainlightOn = function(){
