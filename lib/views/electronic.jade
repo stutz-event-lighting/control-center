@@ -23,6 +23,7 @@ append body
                         button.btn.btn-default(onClick=this.shuttersUp) Hoch
                         button.btn.btn-default(onClick=this.shuttersDown) Runter
                         button.btn.btn-default(onClick=this.shuttersStop) Stop
+                        button.btn.btn-default(onClick=this.shuttersTilt) Gekippt
                 .col-xs-6
                     span= this.client.devices.shutters.state.status||"Unbekannt"
         if client.hasPermission("gate")
@@ -38,13 +39,14 @@ append body
         if client.hasPermission("officelight")
             .row
                 h4 Büro Lampen
-                .btn-toolbar
-                    each scene in this.client.devices.officelight.state.scenes
-                        .btn-group
-                            button.btn.btn-default(onClick=this.setScene(scene.id))= scene.name
-                            button.btn.btn-default(onClick=this.deleteScene(scene.id))
-                                i.glyphicon.glyphicon-remove
-                    button.btn.btn-primary(onClick=this.createScene) Neue Scene
+                .col-xs-12
+                    .btn-toolbar
+                        each scene in this.client.devices.officelight.state.scenes
+                            .btn-group
+                                button.btn.btn-default(onClick=this.setScene(scene.id))= scene.name
+                                button.btn.btn-default(onClick=this.deleteScene(scene.id))
+                                    i.glyphicon.glyphicon-remove
+                        button.btn.btn-primary(onClick=this.createScene) Neue Scene
             if this.props.createscene
                 .modal(style="display:block").fade.in
                     .modal-backdrop(style="bottom:0px;display:block").fade.in
@@ -61,6 +63,22 @@ append body
                             .modal-footer
                                 button.btn.btn-default(onClick=this.cancelCreateScene) Abbrechen
                                 button.btn.btn-primary(onClick=this.confirmCreateScene) Erfassen
+        if client.hasPermission("workshoplight")
+            .row
+                h4 Werkstattlicht
+                .col-xs-6
+                    .btn-toolbar
+                        .btn.btn-default(onClick=this.workshopOn) An
+                        .btn.btn-default(onClick=this.workshopOff) Aus
+                .col-xs-6
+                    span= this.client.devices.workshoplight.state.on?"on":"off"
+        if client.hasPermission("sonos")
+            .row
+                h4 Sonos
+                .col-xs-12
+                    .btn-toolbar
+                        .btn.btn-default(onClick=this.sonosPlay) Play
+                        .btn.btn-default(onClick=this.sonosPause) Stop
         if client.hasPermission("tictactoe")
             .row
                 h4 Super geheime Geheimfunktion
@@ -77,12 +95,12 @@ script.
         this.client.listen();
     }
     
-    exports.componentDidMount = function(){
-        if(!client.session) visit("/login");
-    }
-    
     exports.componentWillUnmount = function(){
         if(this.client) this.client.disconnect();
+    }
+    
+    exports.getNeededPermissions = function(){
+        return [];
     }
     
     exports.mainlightOn = function(){
@@ -105,6 +123,10 @@ script.
     
     exports.shuttersStop = function(){
         this.client.devices.shutters.stop();
+    }
+    
+    exports.shuttersTilt = function(){
+        this.client.devices.shutters.tilt();
     }
     
     exports.gateOpen = function(){
@@ -148,6 +170,22 @@ script.
         return function(){
             this.client.devices.officelight.deleteScene(id);
         }.bind(this)
+    }    
+    
+    exports.workshopOn = function(){
+        this.client.devices.workshoplight.turnOn();
+    }
+    
+    exports.workshopOff = function(){
+        this.client.devices.workshoplight.turnOff();
+    }
+    
+    exports.sonosPlay = function(){
+        this.client.devices.sonos.play();
+    }
+    
+    exports.sonosPause = function(){
+        this.client.devices.sonos.pause();
     }
     
     exports.startTicTacToe = function(){
