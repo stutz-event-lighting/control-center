@@ -72,6 +72,15 @@ append body
                         .btn.btn-default(onClick=this.workshopOff) Aus
                 .col-xs-6
                     span= this.client.devices.workshoplight.state.on?"on":"off"
+        if client.hasPermission("outdoorlight")
+            .row
+                h4 Aussenlicht
+                .col-xs-6
+                    .btn-toolbar
+                        .btn.btn-default(onClick=this.outdoorlightOn) An
+                        .btn.btn-default(onClick=this.outdoorlightOff) Aus
+                .col-xs-6
+                    span= this.client.devices.outdoorlight.state.status
         if client.hasPermission("sonos")
             .row
                 h4 Sonos
@@ -190,4 +199,12 @@ script.
     
     exports.startTicTacToe = function(){
         visit("/tictactoe");
+    }
+    
+    exports.outdoorlightOn = function(){
+        this.client.devices.outdoorlight.turnOn();
+    }
+    
+    exports.outdoorlightOff = function(){
+        this.client.devices.outdoorlight.turnOff();
     }
