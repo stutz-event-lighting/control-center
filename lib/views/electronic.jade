@@ -36,6 +36,30 @@ append body
                         button.btn.btn-default(onClick=this.gateStop) Stoppen
                 .col-xs-6
                     span= this.client.devices.gate.state.state||"Unbekannt"
+        if client.hasPermission("outerdoor")
+            - var state = this.client.devices.outerdoor.state;
+            .row
+                h4 Aussentür
+                .col-xs-6
+                    .btn-toolbar
+                        button.btn.btn-default(onClick=this.outerdoorUnlock) Entriegeln
+                        button.btn.btn-default(onClick=this.outerdoorLock) Verriegeln
+                .col-xs-6
+                    span(style="color:"+(state.open===false?"green":"red"))= state.open===undefined?"Unbekannt":(state.open==true?"Offen":"Geschlossen")
+                    | , 
+                    span(style="color:"+(state.locked===true?"green":"red"))= state.locked===undefined?"Unbekannt":(state.locked===true?"Verriegelt":"Entriegelt")
+        if client.hasPermission("innerdoor")
+            - var state = this.client.devices.innerdoor.state;
+            .row
+                h4 Innentür
+                .col-xs-6
+                    .btn-toolbar
+                        button.btn.btn-default(onClick=this.innerdoorUnlock) Entriegeln
+                        button.btn.btn-default(onClick=this.innerdoorLock) Verriegeln
+                .col-xs-6
+                    span(style="color:"+(state.open===false?"green":"red"))= state.open===undefined?"Unbekannt":(state.open==true?"Offen":"Geschlossen")
+                    | , 
+                    span(style="color:"+(state.locked===true?"green":"red"))= state.locked===undefined?"Unbekannt":(state.locked===true?"Verriegelt":"Entriegelt")
         if client.hasPermission("officelight")
             .row
                 h4 Büro Lampen
@@ -207,4 +231,20 @@ script.
     
     exports.outdoorlightOff = function(){
         this.client.devices.outdoorlight.turnOff();
+    }
+    
+    exports.outerdoorUnlock = function(){
+        this.client.devices.outerdoor.setLocked(false);
+    }
+    
+    exports.outerdoorLock = function(){
+        this.client.devices.outerdoor.setLocked(true);
+    }
+        
+    exports.innerdoorUnlock = function(){
+        this.client.devices.outerdoor.setLocked(false);
+    }
+    
+    exports.innerdoorLock = function(){
+        this.client.devices.outerdoor.setLocked(true);
     }
