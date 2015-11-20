@@ -28,21 +28,18 @@ append body
                                 i.glyphicon.glyphicon-remove
                     .fill.btn.btn-primary(onClick=this.createScene) Neue Scene
                     if this.state.createscene
-                        .modal-backdrop(style="bottom:0px;display:block").fade.in
-                        .modal(style="display:block").fade.in
-                            .modal-dialog
-                                .modal-content
-                                    .modal-header
-                                        h2 Scene erstellen
-                                    .modal-body
-                                        .form-horizontal
-                                            .form-group
-                                                label.col-lg-2.control-label Name
-                                                .col-lg-10
-                                                    input.form-control(type="text" value=this.state.createscene.name onChange=this.validateCreateSceneName.bind(this))
-                                    .modal-footer
-                                        .btn.btn-default(onClick=this.cancelCreateScene) Abbrechen
-                                        .btn.btn-primary(onClick=this.confirmCreateScene) Erfassen
+                        Modal
+                            .modal-header
+                                h2 Scene erstellen
+                            .modal-body
+                                .form-horizontal
+                                    .form-group
+                                        label.col-lg-2.control-label Name
+                                        .col-lg-10
+                                            input.form-control(type="text" value=this.state.createscene.name onChange=this.validateCreateSceneName.bind(this))
+                            .modal-footer
+                                .btn.btn-default(onClick=this.cancelCreateScene) Abbrechen
+                                .btn.btn-primary(onClick=this.confirmCreateScene) Erfassen
             .col-sm-9.col-xs-12
                 .row
                     if client.hasPermission("mainlight")                
@@ -107,6 +104,7 @@ mixin clear(a)
 script.
     var DeviceClient = require("../client/index.js");
     var client = require("boxify/lib/client.js");
+    var Modal = require("boxify/lib/views/Modal.jade");
     var clearindex = 0;
     
     exports.componentWillMount = function(){
