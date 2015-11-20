@@ -1,4 +1,4 @@
-extends ../../../../lib/views/base.jade
+extends boxify/lib/views/base.jade
 
 append body
     - clearindex = 1;
@@ -27,9 +27,9 @@ append body
                             .btn.btn-default(onClick=this.deleteScene(scene.id))
                                 i.glyphicon.glyphicon-remove
                     .fill.btn.btn-primary(onClick=this.createScene) Neue Scene
-                    if this.props.createscene
+                    if this.state.createscene
+                        .modal-backdrop(style="bottom:0px;display:block").fade.in
                         .modal(style="display:block").fade.in
-                            .modal-backdrop(style="bottom:0px;display:block").fade.in
                             .modal-dialog
                                 .modal-content
                                     .modal-header
@@ -39,7 +39,7 @@ append body
                                             .form-group
                                                 label.col-lg-2.control-label Name
                                                 .col-lg-10
-                                                    input.form-control(type="text" value=this.props.createscene.name onChange=this.validateCreateSceneName.bind(this))
+                                                    input.form-control(type="text" value=this.state.createscene.name onChange=this.validateCreateSceneName.bind(this))
                                     .modal-footer
                                         .btn.btn-default(onClick=this.cancelCreateScene) Abbrechen
                                         .btn.btn-primary(onClick=this.confirmCreateScene) Erfassen
@@ -164,20 +164,20 @@ script.
     }
     
     exports.createScene = function(){
-        this.props.createscene = {name:""};
+        this.state.createscene = {name:""};
         this.update();
     }
     exports.validateCreateSceneName = function(e){
-        this.props.createscene.name = e.target.value;
+        this.state.createscene.name = e.target.value;
         this.update();
     }
     exports.cancelCreateScene = function(){
-        delete this.props.createscene;
+        delete this.state.createscene;
         this.update();
     }
     exports.confirmCreateScene = function(){
-        var name = this.props.createscene.name;
-        delete this.props.createscene;
+        var name = this.state.createscene.name;
+        delete this.state.createscene;
         this.update();
         this.client.devices.officelight.createScene(name);
     }
