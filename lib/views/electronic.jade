@@ -1,41 +1,22 @@
-extends ../../../../lib/views/base.jade
+extends boxify/lib/views/base.jade
 
 append body
+    - clearindex = 1;
+    style.
+        h4{
+            margin-top:30px;
+            margin-bottom:0px;
+        }
+        .fill{
+            width:100%;
+            margin-top:10px;
+        }
+        .state{
+            color:#666;
+        }
     .container
         if this.client.state != "connected"
             .alert.alert-warning= this.client.state=="connecting"?"Verbinung wird hergestellt...":"Verbindung verloren. Erneut verbinden in "+this.client.timeUntilReconnect+"s..."
-        if client.hasPermission("mainlight")
-            .row
-                h4 Lager Licht
-                .col-xs-6
-                    .btn-toolbar
-                        button.btn.btn-default(onClick=this.mainlightOn) Voll
-                        button.btn.btn-default(onClick=this.mainlightHalfOn) Halb
-                        button.btn.btn-default(onClick=this.mainlightOff) Aus
-                .col-xs-6
-                    span= this.client.devices.mainlight.state.status||"Unbekannt"
-                    
-        if client.hasPermission("shutters")
-            .row
-                h4 Storen
-                .col-xs-6
-                    .btn-toolbar
-                        button.btn.btn-default(onClick=this.shuttersUp) Hoch
-                        button.btn.btn-default(onClick=this.shuttersDown) Runter
-                        button.btn.btn-default(onClick=this.shuttersStop) Stop
-                        button.btn.btn-default(onClick=this.shuttersTilt) Gekippt
-                .col-xs-6
-                    span= this.client.devices.shutters.state.status||"Unbekannt"
-        if client.hasPermission("gate")
-            .row
-                h4 Rolltor
-                .col-xs-6
-                    .btn-toolbar
-                        button.btn.btn-default(onClick=this.gateOpen) Öffnen
-                        button.btn.btn-default(onClick=this.gateClose) Schliessen
-                        button.btn.btn-default(onClick=this.gateStop) Stoppen
-                .col-xs-6
-                    span= this.client.devices.gate.state.state||"Unbekannt"
         if client.hasPermission("outerdoor")
             - var state = this.client.devices.outerdoor.state;
             .row
@@ -60,22 +41,18 @@ append body
                     span(style="color:"+(state.open===false?"green":"red"))= state.open===undefined?"Unbekannt":(state.open==true?"Offen":"Geschlossen")
                     | , 
                     span(style="color:"+(state.locked===true?"green":"red"))= state.locked===undefined?"Unbekannt":(state.locked===true?"Verriegelt":"Entriegelt")
-        if client.hasPermission("officelight")
-            .row
-                h4 Büro Lampen
-                .col-xs-12
-                    .btn-toolbar
-                        each scene in this.client.devices.officelight.state.scenes
-                            .btn-group
-                                button.btn.btn-default(onClick=this.setScene(scene.id))= scene.name
-                                button.btn.btn-default(onClick=this.deleteScene(scene.id))
-                                    i.glyphicon.glyphicon-remove
-                        button.btn.btn-primary(onClick=this.createScene) Neue Scene
-            if this.props.createscene
-                .modal(style="display:block").fade.in
-                    .modal-backdrop(style="bottom:0px;display:block").fade.in
-                    .modal-dialog
-                        .modal-content
+        .row
+            .col-sm-3.col-xs-12        
+                if client.hasPermission("officelight")
+                    h4 Büro Lampen
+                    each scene in this.client.devices.officelight.state.scenes
+                        .fill.btn-group(style="display:flex")
+                            .btn.btn-default(onClick=this.setScene(scene.id) style="flex:1")= scene.name
+                            .btn.btn-default(onClick=this.deleteScene(scene.id))
+                                i.glyphicon.glyphicon-remove
+                    .fill.btn.btn-primary(onClick=this.createScene) Neue Scene
+                    if this.state.createscene
+                        Modal
                             .modal-header
                                 h2 Scene erstellen
                             .modal-body
@@ -83,42 +60,76 @@ append body
                                     .form-group
                                         label.col-lg-2.control-label Name
                                         .col-lg-10
-                                            input.form-control(type="text" value=this.props.createscene.name onChange=this.validateCreateSceneName.bind(this))
+                                            input.form-control(type="text" value=this.state.createscene.name onChange=this.validateCreateSceneName.bind(this))
                             .modal-footer
-                                button.btn.btn-default(onClick=this.cancelCreateScene) Abbrechen
-                                button.btn.btn-primary(onClick=this.confirmCreateScene) Erfassen
-        if client.hasPermission("workshoplight")
-            .row
-                h4 Werkstattlicht
-                .col-xs-6
-                    .btn-toolbar
-                        .btn.btn-default(onClick=this.workshopOn) An
-                        .btn.btn-default(onClick=this.workshopOff) Aus
-                .col-xs-6
-                    span= this.client.devices.workshoplight.state.on?"on":"off"
-        if client.hasPermission("outdoorlight")
-            .row
-                h4 Aussenlicht
-                .col-xs-6
-                    .btn-toolbar
-                        .btn.btn-default(onClick=this.outdoorlightOn) An
-                        .btn.btn-default(onClick=this.outdoorlightOff) Aus
-                .col-xs-6
-                    span= this.client.devices.outdoorlight.state.status
-        if client.hasPermission("sonos")
-            .row
-                h4 Sonos
-                .col-xs-12
-                    .btn-toolbar
-                        .btn.btn-default(onClick=this.sonosPlay) Play
-                        .btn.btn-default(onClick=this.sonosPause) Stop
-        if client.hasPermission("tictactoe")
-            .row
-                h4 Super geheime Geheimfunktion
-                .btn.btn-danger(onClick=this.startTicTacToe) Diesen Button unter keinen Umständen drücken!
+                                .btn.btn-default(onClick=this.cancelCreateScene) Abbrechen
+                                .btn.btn-primary(onClick=this.confirmCreateScene) Erfassen
+            .col-sm-9.col-xs-12
+                .row
+                    if client.hasPermission("mainlight")                
+                        .col-sm-4.col-xs-12
+                            - var state = this.client.devices.mainlight.state.status;
+                            h4.pull-left Lager Licht
+                            h4.state.pull-right= state||"Unbekannt"
+                            .fill.btn.btn-primary(onClick=this.mainlightOn disabled=state=="on") Voll
+                            .fill.btn.btn-primary(onClick=this.mainlightHalfOn disabled=state=="half") Halb
+                            .fill.btn.btn-primary(onClick=this.mainlightOff disabled=state=="off") Aus
+                        +clear(1)
+                    if client.hasPermission("workshoplight")
+                        .col-sm-4.col-xs-12
+                            - var on = this.client.devices.workshoplight.state.on;               
+                            h4.pull-left Werkstattlicht
+                            h4.state.pull-right= on!==undefined?(on?"on":"off"):"Unbekannt"
+                            .fill.btn.btn-primary(onClick=this.workshopOn disabled=on===true) An
+                            .fill.btn.btn-primary(onClick=this.workshopOff disabled=on===false) Aus
+                        +clear(1)
+                    if client.hasPermission("outdoorlight")                
+                        .col-sm-4.col-xs-12
+                            - var state = this.client.devices.outdoorlight.state.status
+                            h4.pull-left Aussenlicht
+                            h4.state.pull-right= state
+                            .fill.btn.btn-primary(onClick=this.outdoorlightOn disabled=state=="on") An
+                            .fill.btn.btn-primary(onClick=this.outdoorlightOff disabled=state=="off") Aus
+                        +clear(1)
+                    if client.hasPermission("shutters")
+                        .col-sm-4.col-xs-12
+                            - var state = this.client.devices.shutters.state.status
+                            h4.pull-left Storen
+                            h4.state.pull-right= state||"Unbekannt"
+                            .fill.btn.btn-success(onClick=this.shuttersUp disabled=state=="movingup") Hoch
+                            .fill.btn.btn-success(onClick=this.shuttersDown disabled=state=="movingdown") Runter
+                            .fill.btn.btn-success(onClick=this.shuttersStop disabled=state=="stopped") Stop
+                            .fill.btn.btn-success(onClick=this.shuttersTilt) Gekippt
+                        +clear(1)
+                    if client.hasPermission("gate")               
+                        .col-sm-4.col-xs-12
+                            - var state = this.client.devices.gate.state.state
+                            h4.pull-left Rolltor
+                            h4.state.pull-right= state||"Unbekannt"
+                            .fill.btn.btn-success(onClick=this.gateOpen disabled=state=="opening") Öffnen
+                            .fill.btn.btn-success(onClick=this.gateClose disabled=state=="closing") Schliessen
+                            .fill.btn.btn-success(onClick=this.gateStop disabled=(state=="closed"||state=="open"||state=="stopped")) Stoppen
+                        +clear(1)  
+                    if client.hasPermission("sonos")
+                        .col-sm-4.col-xs-12
+                            h4 Sonos
+                            .fill.btn.btn-warning(onClick=this.sonosPlay) Play
+                            .fill.btn.btn-warning(onClick=this.sonosPause) Stop
+                        +clear(1)
+                    if client.hasPermissions("alloff")
+                        .col-sm-4.col-xs-12
+                            h4 Go Home
+                            .fill.btn.btn-danger(onClick=this.goHome) Go Home
+                            
+mixin clear(a)
+    if (clearindex++)%3==0
+        .clearfix.visible-lg.visible-md.visible-sm
+    .clearfix.visible-xs        
 script.
     var DeviceClient = require("../client/index.js");
     var client = require("boxify/lib/client.js");
+    var Modal = require("boxify/lib/views/Modal.jade");
+    var clearindex = 0;
     
     exports.componentWillMount = function(){
         this.client = new DeviceClient();
@@ -175,20 +186,20 @@ script.
     }
     
     exports.createScene = function(){
-        this.props.createscene = {name:""};
+        this.state.createscene = {name:""};
         this.update();
     }
     exports.validateCreateSceneName = function(e){
-        this.props.createscene.name = e.target.value;
+        this.state.createscene.name = e.target.value;
         this.update();
     }
     exports.cancelCreateScene = function(){
-        delete this.props.createscene;
+        delete this.state.createscene;
         this.update();
     }
     exports.confirmCreateScene = function(){
-        var name = this.props.createscene.name;
-        delete this.props.createscene;
+        var name = this.state.createscene.name;
+        delete this.state.createscene;
         this.update();
         this.client.devices.officelight.createScene(name);
     }
@@ -242,9 +253,13 @@ script.
     }
         
     exports.innerdoorUnlock = function(){
-        this.client.devices.outerdoor.setLocked(false);
+        this.client.devices.innerdoor.setLocked(false);
     }
     
     exports.innerdoorLock = function(){
-        this.client.devices.outerdoor.setLocked(true);
+        this.client.devices.innerdoor.setLocked(true);
+    }
+    
+    exports.goHome = function(){
+        this.client.devices.alloff.off();
     }
