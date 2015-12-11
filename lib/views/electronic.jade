@@ -17,30 +17,6 @@ append body
     .container
         if this.client.state != "connected"
             .alert.alert-warning= this.client.state=="connecting"?"Verbinung wird hergestellt...":"Verbindung verloren. Erneut verbinden in "+this.client.timeUntilReconnect+"s..."
-        if client.hasPermission("outerdoor")
-            - var state = this.client.devices.outerdoor.state;
-            .row
-                h4 Aussentür
-                .col-xs-6
-                    .btn-toolbar
-                        button.btn.btn-default(onClick=this.outerdoorUnlock) Entriegeln
-                        button.btn.btn-default(onClick=this.outerdoorLock) Verriegeln
-                .col-xs-6
-                    span(style="color:"+(state.open===false?"green":"red"))= state.open===undefined?"Unbekannt":(state.open==true?"Offen":"Geschlossen")
-                    | , 
-                    span(style="color:"+(state.locked===true?"green":"red"))= state.locked===undefined?"Unbekannt":(state.locked===true?"Verriegelt":"Entriegelt")
-        if client.hasPermission("innerdoor")
-            - var state = this.client.devices.innerdoor.state;
-            .row
-                h4 Innentür
-                .col-xs-6
-                    .btn-toolbar
-                        button.btn.btn-default(onClick=this.innerdoorUnlock) Entriegeln
-                        button.btn.btn-default(onClick=this.innerdoorLock) Verriegeln
-                .col-xs-6
-                    span(style="color:"+(state.open===false?"green":"red"))= state.open===undefined?"Unbekannt":(state.open==true?"Offen":"Geschlossen")
-                    | , 
-                    span(style="color:"+(state.locked===true?"green":"red"))= state.locked===undefined?"Unbekannt":(state.locked===true?"Verriegelt":"Entriegelt")
         .row
             .col-sm-3.col-xs-12        
                 if client.hasPermission("officelight")
@@ -109,13 +85,27 @@ append body
                             .fill.btn.btn-success(onClick=this.gateOpen disabled=state=="opening") Öffnen
                             .fill.btn.btn-success(onClick=this.gateClose disabled=state=="closing") Schliessen
                             .fill.btn.btn-success(onClick=this.gateStop disabled=(state=="closed"||state=="open"||state=="stopped")) Stoppen
-                        +clear(1)  
+                        +clear(1)
+                    if client.hasPermissions("outerdoor") || client.hasPermissions("innerdoor")                        
+                        .col-sm-4.col-xs-12
+                            if client.hasPermissions("outerdoor")
+                                -var state = this.client.devices.outerdoor.state;
+                                h4.pull-left Aussentür
+                                h4.state.pull-right=state.open?"offen":"zu"
+                                .fill.btn.btn-success(onClick=this.outerdoorLock disabled=state.locked) Verriegeln
+                                .fill.btn.btn-success(onClick=this.outerdoorUnlock disabled=!state.locked) Entriegeln
+                    
+                            if client.hasPermissions("innerdoor")
+                                -var state = this.client.devices.innerdoor.state;
+                                h4.pull-left Innentür
+                                h4.state.pull-right=state.open?"offen":"zu"
+                                .fill.btn.btn-success(onClick=this.innerdoorLock disabled=state.locked) Verriegeln
+                                .fill.btn.btn-success(onClick=this.innerdoorUnlock disabled=!state.locked) Entriegeln
                     if client.hasPermission("sonos")
                         .col-sm-4.col-xs-12
                             h4 Sonos
                             .fill.btn.btn-warning(onClick=this.sonosPlay) Play
                             .fill.btn.btn-warning(onClick=this.sonosPause) Stop
-                        +clear(1)
                     if client.hasPermissions("alloff")
                         .col-sm-4.col-xs-12
                             h4 Go Home
@@ -245,21 +235,27 @@ script.
     }
     
     exports.outerdoorUnlock = function(){
-        this.client.devices.outerdoor.setLocked(false);
+        this.client.devices.outerdoor.setAutoLock(false);
     }
     
     exports.outerdoorLock = function(){
-        this.client.devices.outerdoor.setLocked(true);
+        this.client.devices.outerdoor.setAutoLock(true);
     }
         
     exports.innerdoorUnlock = function(){
-        this.client.devices.innerdoor.setLocked(false);
+        this.client.devices.innerdoor.setAutoLock(false);
     }
     
     exports.innerdoorLock = function(){
-        this.client.devices.innerdoor.setLocked(true);
+        this.client.devices.innerdoor.setAutoLock(true);
     }
     
     exports.goHome = function(){
-        this.client.devices.alloff.off();
+        this.mainlightOff();
+        this.workshopOff();
+        this.outdoorLightOff();
+        this.outerdoorLock();
+        this.innerdoorLock();
+        this.sonosPause();
+        this.client.devices.officelight.setSceneByName("Aus");
     }
