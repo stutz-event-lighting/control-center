@@ -1,0 +1,104 @@
+extends boxify/lib/views/base.jade
+
+append body
+    .container
+        h1 Zugänge
+        button.btn.btn-primary.pull-right(onClick=this.create) Erstellen
+        table.table.table-striped
+            thead
+                tr
+                    th Kontakt
+                    th Gültigkeit
+            tbody
+                each pin in this.state.pins
+                    tr
+                        td= [pin.contact.firstname||"",pin.contact.lastname||""].join(" ")
+                        td
+                            each rule in pin.rules
+                                div= this.renderRule(rule)
+                                    
+                                    
+    if this.state.pin
+        Modal
+            .modal-header
+                h2 Zugang erstellen
+            .modal-body
+                .form-horizontal
+                    .form-group
+                        label.col-lg-2.control-label Kontakt
+                        .col-lg-10
+                            ContactBox(value=this.state.pin.person onChange=this.onPersonChanged type="person")
+            .modal-footer
+                button.btn.btn-default(onClick=this.cancel) Abbrechen
+                button.btn.btn-primary(onClick=this.confirm) Erstellen
+script.
+    var client = require("../client.js");
+    var Modal = require("boxify/lib/views/Modal.jade");
+    var ContactBox = require("boxify/lib/views/ContactBox.jade");
+    var moment = require("moment");
+    
+    exports.componentDidMount = function(){
+        if(!this.state.pins) this.loadData();
+    }
+    
+    exports.loadData = function(){
+        client.getPins(function(err,pins){
+            this.state.pins = pins;
+            this.update();
+        }.bind(this));
+    }  
+    
+    exports.create = function(){
+        this.state.pin = {contact:null,pin:""};
+        this.update();
+    }
+    
+    exports.onPersonChanged = function(person){
+        this.state.pin.person = person;
+        this.update();
+    }
+    
+    exports.cancel = function(){
+        delete this.state.pin;
+        this.update();
+    }
+
+    exports.confirm = function(){
+        delete this.state.pin;
+        this.update();
+    }
+    
+    var days = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+    var defaultTimeFrom = new Date(1970,0,1,0,0,0).getTime();
+    var defaultTimeTo = new Date(1970,0,1,23,59,59).getTime();
+    console.log(defaultTimeFrom,defaultTimeTo);
+    exports.renderRule = function(rule){
+        var entries = [];
+        
+        if(rule.from&&rule.to){
+            entries.push(moment(rule.from).format("LL")+" - "+moment(rule.to).format("LL"));
+        }else if(rule.from){
+            entries.push("ab "+moment(rule.from).format("LL"));
+        }else if(rule.to){
+            entries.push("bis "+moment(rule.to).format("LL"));
+        }
+        
+        if(rule.timeFrom !== undefined || rule.timeTo!==undefined){
+            entries.push(moment(rule.timeFrom!==undefined?rule.timeFrom:defaultTimeFrom).format("LT")+" - "+moment(rule.timeTo!==undefined?rule.timeTo:defaultTimeTo).format("LT"));
+        }
+        if(rule.days && rule.days.length < 7){
+            for(var i = 0; rule.days && i < rule.days.length; i++){
+                for(var j = 1; j < rule.days.length-i && rule.days[i+j] == rule.days[i]+j; j++);
+                j--;
+                if(j >= 1){
+                    entries.push(days[rule.days[i]]+"-"+days[rule.days[i]+j]);
+                    i += j;
+                }else{
+                    entries.push(days[rule.days[i]]);
+                }
+            }
+        }
+        
+        if(!entries.length) entries.push("Immer");
+        return entries.join(", ");
+    }
