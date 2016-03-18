@@ -11,11 +11,16 @@ append body
                     th Gültigkeit
             tbody
                 each pin in this.state.pins
-                    tr
-                        td= [pin.contact.firstname||"",pin.contact.lastname||""].join(" ")
+                    tr(onClick=this.editPin(pin))
+                        td= [pin._id.firstname||"",pin._id.lastname||""].join(" ")
                         td
+                            button.btn.btn-xs.btn-default.pull-right(onClick=this.delete(pin))
+                                i.glyphicon.glyphicon-trash
+                            if !pin.rules.length
+                                div Immer
                             each rule in pin.rules
                                 div= this.renderRule(rule)
+
                                     
                                     
     if this.state.pin
@@ -25,17 +30,33 @@ append body
             .modal-body
                 .form-horizontal
                     .form-group
-                        label.col-lg-2.control-label Kontakt
-                        .col-lg-10
-                            ContactBox(value=this.state.pin.person onChange=this.onPersonChanged type="person")
+                        label.col-xs-2.control-label Kontakt
+                        .col-xs-10
+                            ContactBox(value=this.state.pin._id&&this.state.pin._id._id onChange=this.onPersonChanged type="person")
+                    Input(label="PIN" type="text" bsStyle=this.state.pin.pin.length < 4?"error":undefined value=this.state.pin.pin onChange=this.onPinChanged labelClassName="col-xs-2" wrapperClassName="col-xs-10")
+                    
             .modal-footer
                 button.btn.btn-default(onClick=this.cancel) Abbrechen
                 button.btn.btn-primary(onClick=this.confirm) Erstellen
+    if this.state.editPin
+        Pin(pin=this.state.editPin onClose=this.closePin.bind(this))
+    if this.state.delete
+        Modal
+            .modal-header
+                h2 Zugang löschen
+            .modal-body Möchten Sie den Zugang für
+                b= " "+[this.state.delete._id.firstname||"",this.state.delete._id.lastname||""].join(" ")
+                |  wirklich löschen?
+            .modal-footer
+                button.btn.btn-default(onClick=this.cancel) Abbrechen
+                button.btn.btn-primary(onClick=this.confirm) Löschen
 script.
     var client = require("../client.js");
     var Modal = require("boxify/lib/views/Modal.jade");
     var ContactBox = require("boxify/lib/views/ContactBox.jade");
     var moment = require("moment");
+    var Pin = require("./pin.jade");
+    var Input = require("react-bootstrap").Input;
     
     exports.componentDidMount = function(){
         if(!this.state.pins) this.loadData();
@@ -49,29 +70,50 @@ script.
     }  
     
     exports.create = function(){
-        this.state.pin = {contact:null,pin:""};
+        this.state.pin = {_id:null,pin:""};
         this.update();
     }
     
     exports.onPersonChanged = function(person){
-        this.state.pin.person = person;
+        this.state.pin._id = {_id:person};
+        this.update();
+    }
+    
+    exports.onPinChanged = function(e){
+        this.state.pin.pin = e.target.value;
         this.update();
     }
     
     exports.cancel = function(){
         delete this.state.pin;
+        delete this.state.delete;
         this.update();
+    }
+    
+    exports.delete = function(pin){
+        return ()=>{
+            this.state.delete = pin;
+            this.update();
+        }
     }
 
     exports.confirm = function(){
-        delete this.state.pin;
-        this.update();
+        if(this.state.pin){
+            client.createPin(this.state.pin._id._id,this.state.pin.pin,()=>{
+                delete this.state.pin;
+                this.loadData();
+            })
+        }else if(this.state.delete){
+            client.deletePin(this.state.delete._id._id,()=>{
+                delete this.state.delete;
+                this.loadData();
+            })
+        }
     }
     
     var days = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
     var defaultTimeFrom = new Date(1970,0,1,0,0,0).getTime();
-    var defaultTimeTo = new Date(1970,0,1,23,59,59).getTime();
-    console.log(defaultTimeFrom,defaultTimeTo);
+    var defaultTimeTo = new Date(1970,0,1,23,59,59,999).getTime();
     exports.renderRule = function(rule){
         var entries = [];
         
@@ -101,4 +143,17 @@ script.
         
         if(!entries.length) entries.push("Immer");
         return entries.join(", ");
+    }
+    
+    exports.editPin = function(pin){
+        return (e)=>{
+            if(e.target.tagName == "I" || e.target.tagName == "BUTTON") return;
+            this.state.editPin = JSON.parse(JSON.stringify(pin));
+            this.update();
+        }
+    }
+    
+    exports.closePin = function(){
+        delete this.state.editPin;
+        this.loadData();
     }

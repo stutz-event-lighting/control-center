@@ -76,7 +76,6 @@ script.
     exports.componentWillMount = function(){
         this.client = new DeviceClient();
         this.client.on("change",function(){
-            console.log(this.client.state)
             this.forceUpdate();
         }.bind(this))
     }
