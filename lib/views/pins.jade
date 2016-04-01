@@ -91,23 +91,23 @@ script.
     }
     
     exports.delete = function(pin){
-        return ()=>{
+        return function(){
             this.state.delete = pin;
             this.update();
-        }
+        }.bind(this)
     }
 
     exports.confirm = function(){
         if(this.state.pin){
-            client.createPin(this.state.pin._id._id,this.state.pin.pin,()=>{
+            client.createPin(this.state.pin._id._id,this.state.pin.pin,function(){
                 delete this.state.pin;
                 this.loadData();
-            })
+            }.bind(this))
         }else if(this.state.delete){
-            client.deletePin(this.state.delete._id._id,()=>{
+            client.deletePin(this.state.delete._id._id,function(){
                 delete this.state.delete;
                 this.loadData();
-            })
+            }.bind(this))
         }
     }
     
@@ -146,11 +146,11 @@ script.
     }
     
     exports.editPin = function(pin){
-        return (e)=>{
+        return function(e){
             if(e.target.tagName == "I" || e.target.tagName == "BUTTON") return;
             this.state.editPin = JSON.parse(JSON.stringify(pin));
             this.update();
-        }
+        }.bind(this)
     }
     
     exports.closePin = function(){

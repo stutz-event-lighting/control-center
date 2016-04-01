@@ -92,51 +92,51 @@ script.
             rules:this.state.pin.rules
         };
         if(this.state.newPin) data.pin = this.state.newPin;
-        client.updatePin(this.state.pin._id._id,data,(err)=>{
+        client.updatePin(this.state.pin._id._id,data,function(err){
             this.state.pin.pin = this.state.newPin;
             this.props.onClose();
-        });
+        }.bind(this));
 
     }
     
     exports.onFromChanged = function(rule){
-        return (date)=>{
+        return function(date){
             if(date){
                 rule.from = date.getTime();
             }else{
                 delete rule.from;
             }
             this.forceUpdate()
-        }
+        }.bind(this)
     }
     exports.onToChanged = function(rule){
-        return (date)=>{
+        return function(date){
             if(date){
                 rule.to = date.getTime();
             }else{
                 delete rule.to;
             }
-        }
+        }.bind(this)
     }
     exports.onTimeFromChanged = function(rule){
-        return (time)=>{
+        return function(time){
             if(time){
                 rule.timeFrom = new Date(1970,0,1,time.getHours(),time.getMinutes()).getTime();
             }else{
                 delete rule.timeFrom;
             }
             this.forceUpdate()
-        }
+        }.bind(this)
     }
     exports.onTimeToChanged = function(rule){
-        return (time)=>{
+        return function(time){
             if(time){
                 rule.timeTo = new Date(1970,0,1,time.getHours(),time.getMinutes()).getTime()+59999;
             }else{
                 delete rule.timeTo;
             }
             this.forceUpdate()
-        }
+        }.bind(this)
     }
     
     exports.dayEnabled = function(rule,day){
@@ -144,7 +144,7 @@ script.
     }
     
     exports.toggleDay = function(rule,day){
-        return ()=>{
+        return function(){
             if(this.dayEnabled(rule,day)){
                 if(!rule.days||!rule.days.length) rule.days = [0,1,2,3,4,5,6];
                 rule.days.splice(rule.days.indexOf(day),1);
@@ -155,14 +155,14 @@ script.
                 rule.days.sort();
             }
             this.forceUpdate();
-        }
+        }.bind(this)
     }
     
     exports.deleteRule = function(rule){
-        return ()=>{
+        return function(){
             this.state.pin.rules.splice(this.state.pin.rules.indexOf(rule),1);
             this.forceUpdate();
-        }
+        }.bind(this)
     }
     
     exports.addRule = function(rule){
