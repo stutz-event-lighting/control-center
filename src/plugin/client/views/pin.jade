@@ -1,0 +1,186 @@
+Modal
+    .modal-header
+        h3= [this.state.pin._id.firstname||"",this.state.pin._id.lastname||""].join(" ")
+    .modal-body
+        .form-horizontal
+            div(className="form-group "+((this.state.newPin!==undefined&&this.state.newPin.length<4)?"has-error":undefined))
+                label.control-label.col-xs-2 PIN
+                .col-xs-10                    
+                    input.form-control(
+                        type="text"
+                        ref="pin" 
+                        value = this.state.newPin||this.state.pin.pin||"" 
+                        disabled=this.state.newPin===undefined 
+                        onClick=this.editPin.bind(this)
+                        onChange=this.onPinChanged.bind(this)
+                        bsStyle=(this.state.newPin!==undefined&&this.state.newPin.length<4)?"error":undefined
+                    )
+            .form-group
+                label.col-xs-2.control-label Zugang
+                .col-xs-10.checkbox
+                    label
+                        input(type="radio" checked=!this.state.pin.full onClick=this.onAccessClicked.bind(this) ref="half")
+                        |  Abhollager
+                    label
+                        input(type="radio" checked=this.state.pin.full onClick=this.onAccessClicked.bind(this) ref="full")
+                        |  Vollzugang
+        h3 Regeln
+        table.table.table-striped
+            tbody
+                each rule in this.state.pin.rules                    
+                    tr
+                        td.form-horizontal
+                            .form-group
+                                label.input-label.col-lg-2 Datum
+                                .col-lg-10(style="display:flex")
+                                    DatePicker(style="flex:1" time=false value=rule.from?new Date(rule.from):undefined onChange=this.onFromChanged(rule))
+                                    span(style="display:inline-block;lineHeight:32px;paddingLeft:10px;paddingRight:10px") bis
+                                    DatePicker(style="flex:1" time=false value=rule.to?new Date(rule.to):undefined onChange=this.onToChanged(rule))
+                            .form-group
+                                label.input-label.col-lg-2 Zeit
+                                .col-lg-10(style="display:flex")
+                                    DatePicker(style="flex:1" calendar=false value=rule.timeFrom?new Date(rule.timeFrom):undefined onChange=this.onTimeFromChanged(rule))
+                                    span(style="display:inline-block;lineHeight:32px;paddingLeft:10px;paddingRight:10px") bis
+                                    DatePicker(style="flex:1" calendar=false value=rule.timeTo?new Date(rule.timeTo):undefined onChange=this.onTimeToChanged(rule))
+                            .form-group
+                                label.input-label.col-lg-2 Wochentage
+                                .col-lg-10(style="display:flex")
+                                    span(style="paddingLeft:10px;paddingRight:10px") M
+                                    input(type="checkbox" checked=this.dayEnabled(rule,0) onChange=this.toggleDay(rule,0))
+                                    span(style="paddingLeft:10px;paddingRight:10px") D
+                                    input(type="checkbox" checked=this.dayEnabled(rule,1) onChange=this.toggleDay(rule,1))
+                                    span(style="paddingLeft:10px;paddingRight:10px") M
+                                    input(type="checkbox" checked=this.dayEnabled(rule,2) onChange=this.toggleDay(rule,2))
+                                    span(style="paddingLeft:10px;paddingRight:10px") D
+                                    input(type="checkbox" checked=this.dayEnabled(rule,3) onChange=this.toggleDay(rule,3))
+                                    span(style="paddingLeft:10px;paddingRight:10px") F
+                                    input(type="checkbox" checked=this.dayEnabled(rule,4) onChange=this.toggleDay(rule,4))
+                                    span(style="paddingLeft:10px;paddingRight:10px") S
+                                    input(type="checkbox" checked=this.dayEnabled(rule,5) onChange=this.toggleDay(rule,5))
+                                    span(style="paddingLeft:10px;paddingRight:10px") S
+                                    input(type="checkbox" checked=this.dayEnabled(rule,6) onChange=this.toggleDay(rule,6))
+                        td
+                            .btn.btn-default(style="marginTop:60px" onClick=this.deleteRule(rule))
+                                i.glyphicon.glyphicon-trash
+                tr
+                    td(colSpan=2 style="textAlign:center")
+                        .btn.btn-default.pull-right(onClick=this.addRule.bind(this))
+                            i.glyphicon.glyphicon-plus
+                            |  Regel hinzufügen
+                        
+    .modal-footer
+        .btn.btn-default(onClick=this.props.onClose) Abbrechen
+        .btn.btn-primary(onClick=this.save.bind(this)) Speichern
+script.
+    var Modal = require("require")("boxify/lib/views/Modal.js");
+    var client = require("../client");
+    var DatePicker = require("react-widgets").DateTimePicker;
+    var day = 1000*60*60*24;
+script(section="body").        
+    constructor(props,context){
+        super(props,context);
+        this.state = {pin:this.props.pin};
+    }
+    
+    editPin(){
+        if(this.state.newPin===undefined) this.state.newPin = this.state.pin.pin;
+        this.forceUpdate();
+        setTimeout(function(){
+            this.refs.pin.getDOMNode().getElementsByTagName("INPUT")[0].select();
+        }.bind(this))
+    }
+    
+    onPinChanged(e){
+        this.state.newPin = e.target.value;
+        this.forceUpdate();
+    }
+    
+    save(){
+        if(this.state.newPin && this.state.newPin.length < 4) return;
+        var data = {
+            rules:this.state.pin.rules,
+            full:this.state.pin.full
+        };
+        if(this.state.newPin) data.pin = this.state.newPin;
+        client.updatePin(this.state.pin._id._id,data,function(err){
+            this.state.pin.pin = this.state.newPin;
+            this.props.onClose();
+        }.bind(this));
+
+    }
+    
+    onFromChanged(rule){
+        return function(date){
+            if(date){
+                rule.from = date.getTime();
+            }else{
+                delete rule.from;
+            }
+            this.forceUpdate()
+        }.bind(this)
+    }
+    onToChanged(rule){
+        return function(date){
+            if(date){
+                rule.to = date.getTime();
+            }else{
+                delete rule.to;
+            }
+        }.bind(this)
+    }
+    onTimeFromChanged(rule){
+        return function(time){
+            if(time){
+                rule.timeFrom = new Date(1970,0,1,time.getHours(),time.getMinutes()).getTime();
+            }else{
+                delete rule.timeFrom;
+            }
+            this.forceUpdate()
+        }.bind(this)
+    }
+    onTimeToChanged(rule){
+        return function(time){
+            if(time){
+                rule.timeTo = new Date(1970,0,1,time.getHours(),time.getMinutes()).getTime()+59999;
+            }else{
+                delete rule.timeTo;
+            }
+            this.forceUpdate()
+        }.bind(this)
+    }
+    
+    dayEnabled(rule,day){
+        return !rule.days||!rule.days.length||rule.days.indexOf(day)>= 0;
+    }
+    
+    toggleDay(rule,day){
+        return function(){
+            if(this.dayEnabled(rule,day)){
+                if(!rule.days||!rule.days.length) rule.days = [0,1,2,3,4,5,6];
+                rule.days.splice(rule.days.indexOf(day),1);
+                if(!rule.days.length) delete rule.days;
+            }else{
+                if(!rule.days) rule.days = [];
+                rule.days.push(day);
+                rule.days.sort();
+            }
+            this.forceUpdate();
+        }.bind(this)
+    }
+    
+    deleteRule(rule){
+        return function(){
+            this.state.pin.rules.splice(this.state.pin.rules.indexOf(rule),1);
+            this.forceUpdate();
+        }.bind(this)
+    }
+    
+    addRule(rule){
+        this.state.pin.rules.push({})
+        this.forceUpdate();
+    }
+    
+    onAccessClicked(e){
+        this.state.pin.full = e.target == this.refs.full;
+        this.forceUpdate();
+    }

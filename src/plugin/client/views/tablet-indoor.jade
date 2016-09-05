@@ -1,0 +1,73 @@
+div
+    if this.needsLogin()
+        h1 Login Benötigt
+        .form-horizontal
+            .form-group
+                label.col-lg-2.control-label E-Mail
+                .col-lg-10
+                    input.form-control(type="text" value=this.state.email||"" onChange=this.onMailChanged.bind(this))
+            .form-group
+                label.col-lg-2.control-label Passwort
+                .col-lg-10
+                    input.form-control(type="password" value=this.state.password||"" onChange=this.onPasswordChanged.bind(this))
+        .btn.btn-primary.pull-right(onClick=this.login.bind(this)) Anmelden
+    else
+        if this.listen && this.client.state != "connected"
+            .alert.alert-warning= this.client.state=="connecting"?"Verbinung wird hergestellt...":"Verbindung verloren. Erneut verbinden in "+this.client.timeUntilReconnect+"s..."
+        block content    
+script.
+    var DeviceClient = require("../client/index");
+    var client = require("require")("boxify/lib/client.js");
+script(section="body").
+    
+    constructor(props,context){
+        super(props,context);
+        this.state = {};
+    }
+    
+    needsLogin(){
+        var needed = this.getNeededPermissions();
+        for(var i = 0; i< needed.length; i++){
+            if(!client.hasPermission(needed[i])) return true;
+        }
+        return false;
+    }
+    
+    getNeededPermissions(){
+        return [];
+    }   
+    
+    componentWillUnmount(){
+        this.client.disconnect();
+    }
+
+    onMailChanged(e){
+        this.state.email = e.target.value;
+        this.forceUpdate();
+    }
+
+    onPasswordChanged(e){
+        this.state.password = e.target.value;
+        this.forceUpdate();
+    }
+
+    login(){
+        var self = this;
+        if(!this.state.email || !this.state.password) return;
+        client.createSession({email:this.state.email,password:this.state.password},function(err,sessionid){
+            if(err) return alert("Login fehlgeschlagen!");
+            self.forceUpdate();
+        });
+    }
+    
+    componentWillMount(){ 
+        this.client = new DeviceClient();
+        this.client.on("change",function(){
+            this.forceUpdate();
+        }.bind(this))
+        if(this.listen) this.client.listen();
+    }
+    
+    componentWillUnmount(){
+        this.client.disconnect();
+    }

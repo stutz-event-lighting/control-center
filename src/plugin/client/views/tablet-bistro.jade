@@ -1,0 +1,60 @@
+extends ./tablet-indoor
+append content
+    style.
+        h1{
+            text-align:center;
+        }
+        .btn{
+            width:100%;
+            font-size:30px;
+            line-height:60px;
+            margin-top:30px;
+        }
+    .col-xs-4
+        h1 Bistro Licht
+        .btn.btn-primary Scene 1
+        .btn.btn-primary Scene 2
+        .btn.btn-primary Scene 3
+        .btn.btn-primary(onClick=this.turnOfficeOn.bind(this)) Büro Scene hell  
+    .col-xs-4
+        h1 Lager Licht         
+        .btn.btn-success(onClick=this.mainlightOn.bind(this)) An
+        .btn.btn-success(onClick=this.mainlightHalfOn.bind(this)) Halb
+        .btn.btn-success(onClick=this.mainlightOff.bind(this)) Aus
+    .col-xs-4
+        h1 Werkstatt Licht
+        .btn.btn-warning(onClick=this.workshopOn.bind(this)) An
+        .btn.btn-warning(onClick=this.workshopOff.bind(this)) Aus
+        .btn.btn-warning(onClick=this.sonosPlay.bind(this)) Sonos play
+script(section="body").
+    getNeededPermissions(){
+        return ["officelight","mainlight","workshoplight","sonos"];
+    }
+    
+    mainlightOn(){
+        this.client.devices.mainlight.turnOn();
+    }
+    
+    mainlightHalfOn(){
+        this.client.devices.mainlight.turnHalfOn();
+    }
+    
+    mainlightOff(){
+        this.client.devices.mainlight.turnOff();
+    }
+    
+    workshopOn(){
+        this.client.devices.workshoplight.turnOn();
+    }
+    
+    workshopOff(){
+        this.client.devices.workshoplight.turnOff();
+    }
+    
+    turnOfficeOn(){
+        this.client.devices.officelight.setSceneByName("An");
+    }
+    
+    sonosPlay(){
+        this.client.devices.sonos.play();
+    }
