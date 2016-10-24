@@ -112,7 +112,8 @@ script(section="body").
 
     confirm(){
         if(this.state.pin){
-            client.createPin({contact:this.state.pin._id._id,pin:this.state.pin.pin,full:this.state.pin.full},function(){
+            console.log(this.state.pin);
+            client.createPin({_id:this.state.pin._id._id,pin:this.state.pin.pin,full:this.state.pin.full},function(){
                 delete this.state.pin;
                 this.loadData();
             }.bind(this))

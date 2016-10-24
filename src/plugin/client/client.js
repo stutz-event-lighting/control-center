@@ -7,7 +7,7 @@ function Client(){
 
 }
 Client.prototype.createPin = function(data,cb){
-    client.fetch("/api/pins/create",JSON.stringify({_id:data.contect,pin:data.pin,full:data.full}),cb);
+    client.fetch("/api/pins/create",JSON.stringify(data),cb);
 }
 Client.prototype.getPins = function(cb){
     client.fetchJSON("/api/pins",JSON.stringify({}),cb);

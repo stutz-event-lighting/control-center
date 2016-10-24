@@ -3,17 +3,14 @@ Modal
         h3= [this.state.pin._id.firstname||"",this.state.pin._id.lastname||""].join(" ")
     .modal-body
         .form-horizontal
-            div(className="form-group "+((this.state.newPin!==undefined&&this.state.newPin.length<4)?"has-error":undefined))
+            div(className="form-group "+((this.state.newPin.length>0&&this.state.newPin.length<4)?"has-error":undefined))
                 label.control-label.col-xs-2 PIN
-                .col-xs-10                    
+                .col-xs-10
                     input.form-control(
                         type="text"
                         ref="pin" 
-                        value = this.state.newPin||this.state.pin.pin||"" 
-                        disabled=this.state.newPin===undefined 
-                        onClick=this.editPin.bind(this)
+                        value = this.state.newPin
                         onChange=this.onPinChanged.bind(this)
-                        bsStyle=(this.state.newPin!==undefined&&this.state.newPin.length<4)?"error":undefined
                     )
             .form-group
                 label.col-xs-2.control-label Zugang
@@ -79,15 +76,7 @@ script.
 script(section="body").        
     constructor(props,context){
         super(props,context);
-        this.state = {pin:this.props.pin};
-    }
-    
-    editPin(){
-        if(this.state.newPin===undefined) this.state.newPin = this.state.pin.pin;
-        this.forceUpdate();
-        setTimeout(function(){
-            this.refs.pin.getDOMNode().getElementsByTagName("INPUT")[0].select();
-        }.bind(this))
+        this.state = {pin:this.props.pin,newPin:""};
     }
     
     onPinChanged(e){
