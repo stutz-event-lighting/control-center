@@ -81,7 +81,6 @@ Controller.prototype.start = function(){
         this.addDevice("officelight",new OfficeLight(this.config.hueuser));
         this.addDevice("sonos",new Sonos());
         this.addDevice("shutters",new Shutters(r2.relays[1],r2.relays[0]));
-        this.addDevice("tictactoe",new TicTacToe(this.config.hueuser,this.devices.officelight));
         this.addDevice("workshoplight",new WorkshopLight(r1.relays[0],r1.relays[1]));
         this.addDevice("alloff",new AllOff(r1.ios[4],this.devices.mainlight,this.devices.officelight,this.devices.outdoorlight,[r1.relays[0],r1.relays[1]],this.devices.sonos,this.devices.innerdoor,this.devices.outerdoor));
         this.addDevice("bell",new Bell(this.devices.outdoorlight,this.config.boxifyurl));

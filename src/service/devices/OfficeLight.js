@@ -6,8 +6,12 @@ var OfficeLight = module.exports = function MainLight(user){
     Device.call(this);
     hue.nupnpSearch(function(err, result) {
         if (err) throw err;
-        this.api = new hue.HueApi(result[0].ipaddress,user);
-        this.updateScenes();
+        if(!result.length) {
+            this.api = {scenes:function(){},updateScene:function(){},createScene:function(){}}
+        }else{
+    		this.api = new hue.HueApi(result[0].ipaddress,user);
+        }
+    	this.updateScenes();
     }.bind(this));
 
     this.set("scenes",[]);

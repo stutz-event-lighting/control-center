@@ -6,7 +6,6 @@ module.exports = {
     "outerdoor":{name:"Aussentür",commands:["setLocked","setAutoLock"]},
     "innerdoor":{name:"Innentür",commands:["setLocked","setAutoLock"]},
     "officelight":{name:"Bürolicht",commands:["createScene","setScene","setSceneByName","deleteScene"]},
-    "tictactoe":{name:"Tic Tac Toe",commands:["turn"]},
     "outdoorlight":{name:"Aussenlicht",commands:["turnOn","turnOff"]},
     "workshoplight":{name:"Werkstattlicht",commands:["turnOn","turnOff"]},
     "sonos":{name:"Sonos",commands:["play","pause"]},
