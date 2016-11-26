@@ -4,7 +4,7 @@ var upgrade = require("koa-upgrade");
 var devices = require("../../devices");
 var updateTablet = require("./updateTablet");
 
-module.exports = class ControlCenter{
+class ControlCenter{
     constructor(boxify,config){
         this.boxify = boxify;
         this.boxify.controlCenter = this;
@@ -22,6 +22,7 @@ module.exports = class ControlCenter{
         require("./models")(this.boxify.db);
     }
     *start(){
+        console.log("start called")
         this.loadModels();
         setTimeout(()=>{
             for(var ip in this.config.tablets){
@@ -40,3 +41,7 @@ module.exports = class ControlCenter{
         }
     }
 }
+ControlCenter.prototype.start = co.wrap(ControlCenter.prototype.start);
+ControlCenter.prototype.beforeUpdate = co.wrap(ControlCenter.prototype.beforeUpdate);
+
+module.exports = ControlCenter;

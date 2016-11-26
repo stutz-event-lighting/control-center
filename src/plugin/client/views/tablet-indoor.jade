@@ -56,7 +56,7 @@ script(section="body").
         if(!this.state.email || !this.state.password) return;
         client.createSession({email:this.state.email,password:this.state.password},function(err,sessionid){
             if(err) return alert("Login fehlgeschlagen!");
-            self.forceUpdate();
+            location.reload();
         });
     }
     

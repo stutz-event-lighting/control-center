@@ -20,7 +20,6 @@ var Gate = require("./devices/Gate.js");
 var MainLight = require("./devices/MainLight.js");
 var OfficeLight = require("./devices/OfficeLight.js");
 var Shutters = require("./devices/shutters.js");
-var TicTacToe = require("./devices/TicTacToe.js");
 var OutdoorLight = require("./devices/OutdoorLight.js");
 var WorkshopLight = require("./devices/WorkshopLight.js");
 var Sonos = require("./devices/Sonos.js");
@@ -35,7 +34,7 @@ var Controller = module.exports = function Controller(config){
     this.server = http.createServer(this.app);
     this.wsserver = new ws.Server({server:this.server}).on("connection",this.onConnection.bind(this));
 
-    this.app.use("/public",express.static(path.resolve(__dirname,"../public")));
+    this.app.use("/public",express.static(path.resolve(__dirname,"../../public")));
     this.app.get("/:device",function(req,res){
         if(this.devices[req.params.device]){
             res.writeHead(200,"OK",{"Cotent-Type":"application/json"});
@@ -83,7 +82,7 @@ Controller.prototype.start = function(){
         this.addDevice("shutters",new Shutters(r2.relays[1],r2.relays[0]));
         this.addDevice("workshoplight",new WorkshopLight(r1.relays[0],r1.relays[1]));
         this.addDevice("alloff",new AllOff(r1.ios[4],this.devices.mainlight,this.devices.officelight,this.devices.outdoorlight,[r1.relays[0],r1.relays[1]],this.devices.sonos,this.devices.innerdoor,this.devices.outerdoor));
-        this.addDevice("bell",new Bell(this.devices.outdoorlight,this.config.boxifyurl));
+        this.addDevice("bell",new Bell(this.devices.outdoorlight,this.config.url));
         this.loadControllers().catch(function(err){console.log("could not load controllers!")});
         this.outdoorLightLED = r2.relays[2];
         setInterval(this.setOutdoorTabletLEDState.bind(this),60*1000);
