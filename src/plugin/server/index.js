@@ -4,11 +4,7 @@ var upgrade = require("koa-upgrade");
 var devices = require("../../devices");
 var updateTablet = require("./updateTablet");
 
-module.exports = function(boxify,config){
-    return new ControlCenter(boxify,config);
-}
-
-class ControlCenter{
+module.exports = class ControlCenter{
     constructor(boxify,config){
         this.boxify = boxify;
         this.boxify.controlCenter = this;
@@ -20,7 +16,6 @@ class ControlCenter{
             if(!devices[device].public) boxify.addPermission(device,devices[device].name)
         }
         boxify.app.use(mount("/api",require("./api")));
-        require("../routes");
     }
     loadModels(){
         if(this.boxify.db.Pin) return;

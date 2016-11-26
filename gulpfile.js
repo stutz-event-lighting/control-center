@@ -23,7 +23,7 @@ function buildJs(w){
 
 function bundle(w,cb){
 	var bundle = (browserify({basedir:path.resolve(__dirname,"../"),cache:{},packageCache:{},exposeAll:true}));
-	bundle.require(require.resolve("./lib/plugin/client"));
+	bundle.require(require.resolve("./index.js"));
 	if(w) bundle.plugin(watchify);
 	bundle.transform(babelify.configure({
 		presets:["es2015"]

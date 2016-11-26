@@ -2,7 +2,7 @@
   "name": "control-center",
   "version": "1.0.2",
   "description": "The electronics controller for the Stutz Event Lighting warehouse",
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

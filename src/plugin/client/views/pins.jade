@@ -1,28 +1,22 @@
-extends boxify/lib/views/base
-
-append body
-    .container
-        h1 Zugänge
-        button.btn.btn-primary.pull-right(onClick=this.create.bind(this)) Erstellen
-        table.table.table-striped
-            thead
-                tr
-                    th Kontakt
-                    th Gültigkeit
-            tbody
-                each pin in this.state.pins
-                    tr(onClick=this.editPin(pin))
-                        td= [pin._id.firstname||"",pin._id.lastname||""].join(" ")
-                        td
-                            button.btn.btn-xs.btn-default.pull-right(onClick=this.delete(pin))
-                                i.glyphicon.glyphicon-trash
-                            if !pin.rules.length
-                                div Immer
-                            each rule in pin.rules
-                                div= this.renderRule(rule)
-
-                                    
-                                    
+.container
+    h1 Zugänge
+    button.btn.btn-primary.pull-right(onClick=this.create.bind(this)) Erstellen
+    table.table.table-striped
+        thead
+            tr
+                th Kontakt
+                th Gültigkeit
+        tbody
+            each pin in this.state.pins
+                tr(onClick=this.editPin(pin))
+                    td= [pin._id.firstname||"",pin._id.lastname||""].join(" ")
+                    td
+                        button.btn.btn-xs.btn-default.pull-right(onClick=this.delete(pin))
+                            i.glyphicon.glyphicon-trash
+                        if !pin.rules.length
+                            div Immer
+                        each rule in pin.rules
+                            div= this.renderRule(rule)
     if this.state.pin
         Modal
             .modal-header
@@ -70,7 +64,11 @@ script.
     var days = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
     var defaultTimeFrom = new Date(1970,0,1,0,0,0).getTime();
     var defaultTimeTo = new Date(1970,0,1,23,59,59,999).getTime();
-script(section="body").    
+script(section="body").
+    constructor(props,context){
+        super(props,context);
+        this.state = {};
+    }
     componentDidMount(){
         if(!this.state.pins) this.loadData();
     }

@@ -25,9 +25,3 @@ Client.prototype.login = function(pin,cb){
         client.getSession(cb);
     });
 }
-
-var menu = require("require")("boxify/lib/views/menu.js").menu;
-menu.Elektronik = {url:"/electronic",loggedIn:true};
-menu.Zugänge = {url:"/pins",loggedIn:true};
-
-require("require")("boxify/lib/views/profile.js").extensionSections.push(require("./views/PinSection"));
