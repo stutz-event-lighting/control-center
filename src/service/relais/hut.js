@@ -11,12 +11,12 @@ class HUT extends events.EventEmitter{
         this.username = username;
         this.password = password;
         this.socket = dgram.createSocket('udp4');
-        this.socket.bind(this.port,function(){
-            self.socket.on("message",function(e){
-                self.readMessage(e);
+        this.socket.bind(this.port,()=>{
+            this.socket.on("message",(e)=>{
+                this.readMessage(e);
             });
             var buf = new Buffer("wer da?\r\n");
-            self.socket.send(buf,0,buf.length,self.port,self.ip);
+            this.socket.send(buf,0,buf.length,this.port,this.ip);
         });
     }
 

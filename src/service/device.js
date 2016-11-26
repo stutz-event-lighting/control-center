@@ -15,3 +15,5 @@ class Device extends EventEmitter{
         return this.state;
     }
 }
+
+module.exports = Device;

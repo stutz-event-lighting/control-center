@@ -54,7 +54,7 @@ class Controller{
                 ctx.set("Cotent-Type","application/json");
                 ctx.body = JSON.stringify(this.devices[ctx.params.device].getState());
             }.bind(this))
-            .post("/:device/:command".json(),async function(ctx){
+            .post("/:device/:command",async function(ctx){
                 var body = await parse.json(ctx);
                 var device = this.devices[ctx.params.device];
                 if(device && devices[ctx.params.device].commands.indexOf(ctx.params.command)>=0) await device[ctx.params.command].apply(device,body);
