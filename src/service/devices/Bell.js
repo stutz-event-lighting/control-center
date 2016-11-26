@@ -6,6 +6,7 @@ var pify = require("pify");
 
 class Bell extends Device{
     constructor(outdoorlight,url){
+        super();
         this.outdoorlight = outdoorlight;
         this.url = "http://"+url+"/public/bell.mp3";
     }

@@ -4,6 +4,7 @@ var devices = require("../../../devices");
 
 class DeviceClient extends EventEmitter{
     constructor(){
+        super();
         this.state = "disconnected";
         this.devices = {};
         for(var device in devices){

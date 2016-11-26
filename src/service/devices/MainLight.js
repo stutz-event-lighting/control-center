@@ -1,6 +1,7 @@
 var Device = require("../device.js");
 class MainLight extends Device{
     constructor(io,half,full){
+        super();
         this.io = io;
         this.half = half;
         this.full = full;

@@ -3,6 +3,7 @@ var sleep = require("sleep.async");
 
 class Door extends Device{
     constructor(io,relay){
+        super();
         this.io = io;
         this.relay = relay;
         this.autoLock = true;

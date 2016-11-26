@@ -4,6 +4,7 @@ var sleep = require("sleep.async");
 
 class AllOff extends Device{
     constructor(button,mainlight,officelight,outdoorlight,lights,sonos,outerdoor,innerdoor){
+        super();
         this.lights = lights;
         this.officelight = officelight;
         this.mainlight = mainlight;

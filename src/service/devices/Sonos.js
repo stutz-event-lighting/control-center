@@ -1,6 +1,6 @@
 var Device = require("../device.js");
 var sonos = require("sonos");
-var pify = require("pify"),
+var pify = require("pify");
 
 class Sonos extends Device{
     async getDevice(){

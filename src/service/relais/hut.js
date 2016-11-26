@@ -3,8 +3,9 @@ var events = require("events");
 var Relay = require("./relay.js");
 var IO = require("./io.js");
 
-class HUT exports events.EventEmitter{
+class HUT extends events.EventEmitter{
     constructor(ip,port,username,password){
+        super();
         this.ip = ip;
         this.port = port;
         this.username = username;

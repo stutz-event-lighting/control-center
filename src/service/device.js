@@ -2,6 +2,7 @@ var EventEmitter = require("events").EventEmitter;
 
 class Device extends EventEmitter{
     constructor(){
+        super();
         this.state = {};
     }
 

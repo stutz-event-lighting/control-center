@@ -2,6 +2,7 @@ var Device = require("../device.js");
 
 class Shutters extends Device{
     constructor(up,down){
+        super();
         this.up = up;
         this.down = down;
         this.timeout = null;

@@ -2,6 +2,7 @@ var async = require("async");
 var Device = require("../device.js");
 class OutdoorLight extends Device{
     constructor(light){
+        super();
         this.light = light;
         this.light.on("change",this.detectState.bind(this));
         this.detectState();

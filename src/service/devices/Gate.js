@@ -3,6 +3,7 @@ var checkDark = require("../checkDark.js");
 
 class Gate extends Device{
     constructor(button,io_closed,io_open,relay_open,relay_close){
+        super();
         this.direction = "up";
         this.button = button;
         this.io_open = io_open;

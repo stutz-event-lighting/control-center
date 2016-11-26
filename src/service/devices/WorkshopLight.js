@@ -2,6 +2,7 @@ var Device = require("../device.js");
 
 class WorkshopLight extends Device{
     constructor(relay,relay2){
+        super();
         this.relay = relay;
         this.relay2 = relay2;
         this.relay.on("change",this.updateState.bind(this));

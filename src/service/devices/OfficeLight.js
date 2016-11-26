@@ -5,6 +5,7 @@ var pify = require("pify");
 
 class OfficeLight extends Device{
     constructor(user){
+        super();
         this.user = user;
         this.set("scenes",[]);
         this.api = {scenes:function(){},updateScene:function(){},createScene:function(){}}
