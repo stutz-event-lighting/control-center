@@ -73,11 +73,9 @@ script(section="body").
         if(!this.state.pins) this.loadData();
     }
     
-    loadData(){
-        client.getPins(function(err,pins){
-            this.state.pins = pins;
-            this.forceUpdate();
-        }.bind(this));
+    async loadData(){
+        this.state.pins = await client.getPins();
+        this.forceUpdate();
     }  
     
     create(){
@@ -108,19 +106,15 @@ script(section="body").
         }.bind(this)
     }
 
-    confirm(){
+    async confirm(){
         if(this.state.pin){
-            client.createPin({_id:this.state.pin._id._id,pin:this.state.pin.pin,full:this.state.pin.full},function(){
-                delete this.state.pin;
-                this.loadData();
-            }.bind(this))
+            await client.createPin({_id:this.state.pin._id._id,pin:this.state.pin.pin,full:this.state.pin.full});
         }else if(this.state.delete){
-            client.deletePin(this.state.delete._id._id,function(){
-                delete this.state.delete;
-                this.loadData();
-            }.bind(this))
+            await client.deletePin(this.state.delete._id._id);
         }
-    }    
+        delete this.state.delete;
+        this.loadData();
+    }
 
     renderRule(rule){
         var entries = [];

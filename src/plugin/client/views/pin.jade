@@ -84,18 +84,16 @@ script(section="body").
         this.forceUpdate();
     }
     
-    save(){
+    async save(){
         if(this.state.newPin && this.state.newPin.length < 4) return;
         var data = {
             rules:this.state.pin.rules,
             full:this.state.pin.full
         };
         if(this.state.newPin) data.pin = this.state.newPin;
-        client.updatePin(this.state.pin._id._id,data,function(err){
-            this.state.pin.pin = this.state.newPin;
-            this.props.onClose();
-        }.bind(this));
-
+        await client.updatePin(this.state.pin._id._id,data);
+        this.state.pin.pin = this.state.newPin;
+        this.props.onClose();
     }
     
     onFromChanged(rule){

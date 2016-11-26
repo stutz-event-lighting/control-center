@@ -51,20 +51,21 @@ script(section="body").
         this.forceUpdate();
     }
 
-    login(){
-        var self = this;
+    async login(){
         if(!this.state.email || !this.state.password) return;
-        client.createSession({email:this.state.email,password:this.state.password},function(err,sessionid){
-            if(err) return alert("Login fehlgeschlagen!");
-            location.reload();
-        });
+        try{
+            var sessionid = await client.createSession({email:this.state.email,password:this.state.password});
+            this.forceUpdate();
+        }catch(e){
+            alert("Login fehlgeschlagen!");
+        }
     }
     
     componentWillMount(){ 
         this.client = new DeviceClient();
-        this.client.on("change",function(){
+        this.client.on("change",()=>{
             this.forceUpdate();
-        }.bind(this))
+        })
         if(this.listen) this.client.listen();
     }
     

@@ -94,12 +94,11 @@ script(section="body").
         super(props,context);
         this.state = {};
     }    
-    componentWillMount(){
+    async componentWillMount(){
         var self = this;
         if(client.session){
-            client.deleteSession(function(){
-                self.forceUpdate();
-            });
+            await client.deleteSession();
+            self.forceUpdate();
         }
         this.client = new DeviceClient();
     }
@@ -117,24 +116,24 @@ script(section="body").
         this.forceUpdate();
     }
 
-    login (){
+    async login (){
         var self = this;
-        cli.login(this.state.code,function(err){
+        try{
+            await cli.login(this.state.code);
             self.state.code = "";
-            if(err){
-                self.state.showPinError = true;
-                self.forceUpdate();
-                return;
-            }
-            if(client.hasPermission("outerdoor")) self.client.devices.outerdoor.setLocked(false);
-            if(client.hasPermission("innerdoor")) setTimeout(function(){self.client.devices.innerdoor.setLocked(false);},2000);
+        }catch(err){
+            self.state.showPinError = true;
+            self.state.code = "";
             self.forceUpdate();
-            logoutTimeout = setTimeout(function(){
-                client.deleteSession().then(function(){
-                    self.forceUpdate();
-                });
-            },30000);
-        })
+            return;
+        }
+        if(client.hasPermission("outerdoor")) self.client.devices.outerdoor.setLocked(false);
+        if(client.hasPermission("innerdoor")) setTimeout(function(){self.client.devices.innerdoor.setLocked(false);},2000);
+        self.forceUpdate();
+        logoutTimeout = setTimeout(function(){
+            await client.deleteSession();
+            self.forceUpdate();
+        },30000);
     }
     
     openGate(){

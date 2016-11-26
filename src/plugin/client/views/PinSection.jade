@@ -39,10 +39,9 @@ script(section="body").
         this.forceUpdate();
     }
     
-    confirmChangePin(){
+    async confirmChangePin(){
         if(!this.state.changepin.pin.length) return alert("Bitte geben Sie eine neue PIN ein");
-        client.updatePin(this.props.user,{pin:this.state.changepin.pin},function(err){
-            delete this.state.changepin;
-            this.forceUpdate();
-        }.bind(this));
+        await client.updatePin(this.props.user,{pin:this.state.changepin.pin});
+        delete this.state.changepin;
+        this.forceUpdate();
     }
