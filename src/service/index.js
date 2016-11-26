@@ -1,13 +1,17 @@
 var http = require("http");
-var express = require("express");
-var bp = require("body-parser");
 var ws = require("ws");
-var async = require("async");
 var byline = require("byline");
 var url = require("url");
 var suncalc = require("suncalc");
 var fs = require("fs-promise");
 var path = require("path");
+var Koa = require("koa");
+var serve = require("koa-static");
+var compose = require("koa-compose");
+var mount = require("koa-mount");
+var router = require("koa-router")();
+var upgrade = require("koa-upgrade");
+var parse = require("co-body");
 
 require("babel-polyfill");
 
@@ -28,55 +32,53 @@ var Door = require("./devices/Door.js");
 var Bell = require("./devices/Bell.js");
 
 
-var Controller = module.exports = function Controller(config){
-    this.config = config;
-    this.connections = [];
-    this.devices = {};
-    this.app = express();
-    this.server = http.createServer(this.app);
-    this.wsserver = new ws.Server({server:this.server}).on("connection",this.onConnection.bind(this));
+class Controller{
+    constructor(config){
+        this.config = config;
+        this.connections = [];
+        this.devices = {};
+        this.app = new Koa();
 
-    this.app.use("/public",express.static(path.resolve(__dirname,"../../public")));
-    this.app.get("/:device",function(req,res){
-        if(this.devices[req.params.device]){
-            res.writeHead(200,"OK",{"Cotent-Type":"application/json"});
-            res.end(JSON.stringify(this.devices[req.params.device].getState()));
-        }else{
-            res.writeHead(404,"Not found");
-            res.end();
-        }
-    }.bind(this));
-    this.app.post("/:device/:command",bp.json(),function(req,res){
-        var device = this.devices[req.params.device];
-        if(device && devices[req.params.device].commands.indexOf(req.params.command)>=0) device.call(req.params.command,req.body);
-        res.end();
-    }.bind(this));
-}
+        upgrade(this.app);
 
-Controller.prototype.start = function(){
-    var self = this;
-
-    async.parallel([
-        function(cb){
-            var relais = new HUT("192.168.1.201",75,"admin","anel");
-            relais.initialize(function(){
-                cb(null,relais)
-            });
-        },
-        function(cb){
-            var relais = new HUT("192.168.1.202",76,"admin","anel");
-            relais.initialize(function(){
-                cb(null,relais)
-            });
-        }
-    ],function(err,huts){
-        if(err) throw err;
-        var r1 = this.relais1 = huts[0];
-        var r2 = this.relais2 = huts[1];
+        this.app.use(mount("/public",serve(path.resolve(__dirname,"../../public"))));
+        this.app.use(router
+            .get("/",async function(ctx){
+                if(ctx.get("Connection") != "Upgrade") return;
+                var c = await ctx.upgrade();
+                this.onConnection(c);
+                ctx.respond = false;
+            })
+            .get("/:device",async function(ctx){
+                if(!this.devices[ctx.params.device]) return;
+                ctx.set("Cotent-Type","application/json");
+                ctx.body = JSON.stringify(this.devices[ctx.params.device].getState());
+            }.bind(this))
+            .post("/:device/:command".json(),async function(ctx){
+                var body = await parse.json(ctx);
+                var device = this.devices[ctx.params.device];
+                if(device && devices[ctx.params.device].commands.indexOf(ctx.params.command)>=0) await device[ctx.params.command].apply(device,body);
+            }.bind(this))
+            .routes()
+        );
+    }
+    async start(){
+        var [r1,r2] = await Promise.all([
+            async function(){
+                var relais = new HUT("192.168.1.201",75,"admin","anel");
+                await new Promise((s)=>relais.once("initialized",s));
+                return relais;
+            }(),
+            async function(){
+                var relais = new HUT("192.168.1.202",76,"admin","anel");
+                await new Promise((s)=>relais.once("initialized",s));
+                return relais;
+            }()
+        ]);
 
         this.addDevice("mainlight",new MainLight(r1.ios[3],r1.relays[4],r1.relays[5]));
         this.addDevice("outdoorlight",new OutdoorLight(r2.relays[3]));
-        this.addDevice("gate",new Gate(r1.ios[2],r2.ios[1],r2.ios[0],r1.relays[6],r1.relays[7],this.devices.mainlight,this.devices.outdoorlight));
+        this.addDevice("gate",new Gate(r1.ios[2],r2.ios[1],r2.ios[0],r1.relays[6],r1.relays[7]));
         this.addDevice("outerdoor",new Door(r2.ios[2],r2.relays[4]));
         this.addDevice("innerdoor",new Door(r2.ios[3],r2.relays[5]));
         this.addDevice("officelight",new OfficeLight(this.config.hueuser));
@@ -91,44 +93,46 @@ Controller.prototype.start = function(){
         this.setOutdoorTabletLEDState();
 
         this.server.listen(this.config.port);
-    }.bind(this));
-}
+    }
 
-Controller.prototype.addDevice = function(name,device){
-    this.devices[name] = device;
-    device.commands = devices[name].commands;
-    device.on("change",function(){
-        var states = {};
-        states[name] = device.getState();
-        for(var i = 0; i < this.connections.length; i++){
-            this.connections[i].send(JSON.stringify(states));
+    addDevice(name,device){
+        this.devices[name] = device;
+        device.commands = devices[name].commands;
+        device.on("change",()=>{
+            var states = {};
+            states[name] = device.getState();
+            for(var i = 0; i < this.connections.length; i++){
+                this.connections[i].send(JSON.stringify(states));
+            }
+        });
+    }
+
+    async loadControllers(){
+        var controllers = await fs.readdir(path.resolve(__dirname,"./controllers"));
+        for(var i = 0; i < controllers.length; i++){
+            require("./controllers/"+controllers[i])(this);
         }
-    }.bind(this));
-}
+    }
 
-Controller.prototype.loadControllers = async function(){
-    var controllers = await fs.readdir(path.resolve(__dirname,"./controllers"));
-    for(var i = 0; i < controllers.length; i++){
-        require("./controllers/"+controllers[i])(this);
+    onConnection(c){
+        var params = url.parse(c.upgradeReq.url,true).query;
+        this.connections.push(c);
+        c.on("close",()=>{
+            this.connections.splice(this.connections.indexOf(c),1);
+        });
+        c.on("error",function(){})
+        var states = {};
+        for(var device in this.devices){
+            states[device] = this.devices[device].getState();
+        }
+        c.send(JSON.stringify(states));
+    }
+
+    setOutdoorTabletLEDState(){
+        var on = checkDark(1,5);
+        this.outdoorLightLED.set(on)
+        if(!on) this.devices.outdoorlight.turnOff();
     }
 }
 
-Controller.prototype.onConnection = function(c){
-    var params = url.parse(c.upgradeReq.url,true).query;
-    this.connections.push(c);
-    c.on("close",function(){
-        this.connections.splice(this.connections.indexOf(c),1);
-    }.bind(this));
-    c.on("error",function(){})
-    var states = {};
-    for(var device in this.devices){
-        states[device] = this.devices[device].getState();
-    }
-    c.send(JSON.stringify(states));
-}
-
-Controller.prototype.setOutdoorTabletLEDState = function(){
-    var on = checkDark(1,5);
-    this.outdoorLightLED.set(on,function(){})
-    if(!on) this.devices.outdoorlight.turnOff(function(){});
-}
+module.exports = Controller;

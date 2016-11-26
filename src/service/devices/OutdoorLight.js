@@ -1,22 +1,22 @@
 var async = require("async");
 var Device = require("../device.js");
-var OutdoorLight = module.exports = function MainLight(light){
-    Device.call(this);
-    this.light = light;
-    this.light.on("change",this.detectState.bind(this));
-    this.detectState();
-}
+class OutdoorLight extends Device{
+    constructor(light){
+        this.light = light;
+        this.light.on("change",this.detectState.bind(this));
+        this.detectState();
+    }
 
-OutdoorLight.prototype = Object.create(Device.prototype);
+    detectState(){
+        this.set("status",this.light.value?"on":"off");
+    }
 
-OutdoorLight.prototype.detectState = function(){
-    this.set("status",this.light.value?"on":"off");
-}
+    async turnOff(){
+        await this.light.set(false);
+    }
 
-OutdoorLight.prototype.turnOff = function(cb){
-    this.light.set(false,cb);
+    async turnOn(){
+        await this.light.set(true);
+    }
 }
-
-OutdoorLight.prototype.turnOn = function(cb){
-    this.light.set(true,cb);
-}
+module.exports = OutdoorLight;

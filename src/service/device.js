@@ -1,26 +1,16 @@
 var EventEmitter = require("events").EventEmitter;
 
-var Device = module.exports = function Device(){
-    this.state = {};
-}
-Device.prototype = Object.create(EventEmitter.prototype);
-
-Device.prototype.set = function(key,value){
-    this.state[key] = value;
-    this.emit("change");
-}
-
-Device.prototype.call = function(name,args){
-    if(args instanceof Array) {
-        this[name].apply(this,args.concat([function(){
-        }]));
+class Device extends EventEmitter{
+    constructor(){
+        this.state = {};
     }
-}
 
-Device.prototype.getCommands = function(){
-    return this.commands;
-}
+    set(key,value){
+        this.state[key] = value;
+        this.emit("change");
+    }
 
-Device.prototype.getState = function(){
-    return this.state;
+    getState (){
+        return this.state;
+    }
 }

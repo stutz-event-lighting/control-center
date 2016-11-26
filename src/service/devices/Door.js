@@ -1,50 +1,47 @@
 var Device = require("../device.js");
+var sleep = require("sleep.async");
 
-var Door = module.exports = function Door(io,relay){
-    Device.call(this);
-    this.io = io;
-    this.relay = relay;
-    this.autoLock = true;
+class Door extends Device{
+    constructor(io,relay){
+        this.io = io;
+        this.relay = relay;
+        this.autoLock = true;
 
-    this.set("open",!this.io.value);
-    this.set("locked",!this.relay.value);
-
-    this.io.on("change",function(){
         this.set("open",!this.io.value);
-        this.checkLock(function(){});
-    }.bind(this));
-
-    this.relay.on("change",function(){
         this.set("locked",!this.relay.value);
-    }.bind(this));
 
-    this.checkLock(function(){})
-}
+        this.io.on("change",()=>{
+            this.set("open",!this.io.value);
+            this.checkLock();
+        });
 
-Door.prototype = Object.create(Device.prototype);
+        this.relay.on("change",()=>{
+            this.set("locked",!this.relay.value);
+        });
 
-Door.prototype.setLocked = function(locked,cb){
-    this.relay.set(!locked,function(){
-        cb();
+        this.checkLock(function(){})
+    }
+    async setLocked(locked){
+        await this.relay.set(!locked);
         if(!locked && this.autoLock){
-            setTimeout(function(){
-                this.checkLock(function(){});
-            }.bind(this),30*1000);
+            sleep(30*1000).then(()=>{
+                this.checkLock();
+            });
         }
-    }.bind(this));
-}
+    }
 
-Door.prototype.setAutoLock = function(autolock,cb){
-    this.autoLock = autolock;
-    this.checkLock(cb);
-}
+    async setAutoLock(autolock){
+        this.autoLock = autolock;
+        await this.checkLock();
+    }
 
-Door.prototype.checkLock = function(cb){
-    if(!this.state.locked && this.autoLock){
-        this.setLocked(true,cb);
-    }else if(this.state.locked && !this.autoLock){
-        this.setLocked(false,cb);
-    }else{
-        cb();
+    async checkLock(){
+        if(!this.state.locked && this.autoLock){
+            await this.setLocked(true);
+        }else if(this.state.locked && !this.autoLock){
+            await this.setLocked(false);
+        }
     }
 }
+
+module.exports = Door;

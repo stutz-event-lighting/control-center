@@ -1,46 +1,36 @@
-var EventEmitter = require("events").EventEmitter;
+var IO = require("./io");
+
+class Relay extends IO{
+    constructor(hut,index,value){
+        super(hut,index,value)
+        this.targetValue = value;
+        this.checking = false;
+    }
+
+    async toggle(){
+        await this.set(!this.value);
+    }
+
+    async set(value){
+        if(this.value == value) return;
+        await new Promise((s)=>{
+            this.targetValue = value;
+            this.once("change",cb);
+            this.check();
+        });
+    }
+
+    check(){
+        if(this.checking) return;
+        if(this.value != this.targetValue){
+            this.checking = true;
+            this.hut.setRelay(this.index,this.targetValue);
+            setTimeout(()=>{
+                this.checking = false;
+                this.check();
+            },10);
+        }
+    }
+}
 
 module.exports = Relay;
-
-function Relay(hut,index,value){
-    EventEmitter.call(this);
-    this.hut = hut;
-    this.index = index;
-    this.value = value;
-    this.targetValue = value;
-    this.checking = false;
-}
-
-Relay.prototype = Object.create(EventEmitter.prototype);
-
-Relay.prototype.update = function(value){
-    if(this.value != value){
-        this.value = value;
-        this.emit("change",value);
-    }
-}
-
-Relay.prototype.toggle = function(cb){
-    this.set(!this.value,cb);
-}
-
-Relay.prototype.set = function(value,cb){
-    cb = cb||function(){}
-    if(this.value == value) return cb();
-    this.targetValue = value;
-    this.once("change",cb);
-    this.check();
-}
-
-Relay.prototype.check = function(){
-    if(this.checking) return;
-    if(this.value != this.targetValue){
-        this.checking = true;
-        this.hut.setRelay(this.index,this.targetValue);
-        var self = this;
-        setTimeout(function(){
-            self.checking = false;
-            self.check();
-        },10);
-    }
-}
