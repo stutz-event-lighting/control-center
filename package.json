@@ -10,13 +10,11 @@
   "license": "proprietary",
   "dependencies": {
     "babel-polyfill": "^6.16.0",
-    "body-parser": "^1.15.2",
     "byline": "^4.2.1",
     "co-body": "^4.0.0",
     "co-request": "^1.0.0",
     "cookies-js": "^1.2.2",
     "fs-promise": "^1.0.0",
-    "gulp-watch": "^4.3.8",
     "html-entities": "^1.2.0",
     "jade2react": "github:vancoding/jade2react",
     "koa": "^2.0.0",
@@ -45,6 +43,7 @@
     "gulp-babel": "^6.1.2",
     "gulp-ext-replace": "^0.3.0",
     "gulp-transform": "^1.0.7",
+    "gulp-watch": "^4.3.8",
     "jade2react": "github:vancoding/jade2react",
     "watchify": "^3.7.0"
   }

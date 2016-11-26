@@ -10,10 +10,10 @@ module.exports = router
 		if(!devices[ctx.params.device] || !devices[ctx.params.device].public){
 			await ensure(ctx.app.db,ctx.cookies.get("session"),ctx.params.device);
 		}
-		ctx.body = ctx.req.pipe(request.post({
+		ctx.body = ctx.body = request.post({
 			url:"http://localhost:"+ctx.app.controlCenter.config.port+"/"+ctx.params.device+"/"+ctx.params.command,
 			headers:ctx.headers
-		}))
+		});
 	})
 	.get("",async function(ctx){
 		var session = (await getSession(ctx.app.db,ctx.cookies.get("session")))||{permissions:[]};
