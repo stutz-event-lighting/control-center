@@ -7,17 +7,25 @@ var browserify = require("browserify");
 var replaceExt = require("gulp-ext-replace");
 var transform = require("gulp-transform");
 var jade2react = require("jade2react");
-var babelify = require("babelify");
+var babel = require("gulp-babel");
 
 function buildJade(w){
 	return (w?watch('src/**/*.jade', { ignoreInitial: true }):gulp.src("src/**/*.jade"))
 		.pipe(replaceExt(".js"))
 		.pipe(transform((code)=>jade2react.compile(code.toString("utf8"))))
+		.pipe(babel({
+			presets:["es2015"],
+			plugins:["syntax-async-functions","transform-regenerator"]
+		}))
 		.pipe(gulp.dest('lib'));
 }
 
 function buildJs(w){
 	return (w?watch('src/**/*.js', { ignoreInitial: true }):gulp.src("src/**/*.js"))
+		.pipe(babel({
+			presets:["es2015"],
+			plugins:["syntax-async-functions","transform-regenerator"]
+		}))
 		.pipe(gulp.dest('lib'));
 }
 
@@ -25,9 +33,6 @@ function bundle(w,cb){
 	var bundle = (browserify({basedir:path.resolve(__dirname,"../"),cache:{},packageCache:{},exposeAll:true}));
 	bundle.require(require.resolve("./index.js"));
 	if(w) bundle.plugin(watchify);
-	bundle.transform(babelify.configure({
-		presets:["es2015"]
-	}))
 
 	function doBundle(){
 		bundle.bundle(function(err,bundle){

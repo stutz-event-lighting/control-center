@@ -76,41 +76,40 @@ script(section="body").
     loadData(){
         client.getPins(function(err,pins){
             this.state.pins = pins;
-            this.update();
+            this.forceUpdate();
         }.bind(this));
     }  
     
     create(){
         this.state.pin = {_id:null,pin:"",full:false};
-        this.update();
+        this.forceUpdate();
     }
     
     onPersonChanged(person){
         this.state.pin._id = {_id:person};
-        this.update();
+        this.forceUpdate();
     }
     
     onPinChanged(e){
         this.state.pin.pin = e.target.value;
-        this.update();
+        this.forceUpdate();
     }
     
     cancel(){
         delete this.state.pin;
         delete this.state.delete;
-        this.update();
+        this.forceUpdate();
     }
     
     delete(pin){
         return function(){
             this.state.delete = pin;
-            this.update();
+            this.forceUpdate();
         }.bind(this)
     }
 
     confirm(){
         if(this.state.pin){
-            console.log(this.state.pin);
             client.createPin({_id:this.state.pin._id._id,pin:this.state.pin.pin,full:this.state.pin.full},function(){
                 delete this.state.pin;
                 this.loadData();
@@ -158,7 +157,7 @@ script(section="body").
         return function(e){
             if(e.target.tagName == "I" || e.target.tagName == "BUTTON") return;
             this.state.editPin = JSON.parse(JSON.stringify(pin));
-            this.update();
+            this.forceUpdate();
         }.bind(this)
     }
     

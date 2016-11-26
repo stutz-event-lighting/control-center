@@ -7,21 +7,37 @@ function Client(){
 
 }
 Client.prototype.createPin = function(data,cb){
-    client.fetch("/api/pins/create",JSON.stringify(data),cb);
+    client.getText("/api/pins/create",{method:"POST",jsonBody:data})
+        .then(function(id){
+            cb(null,id);
+        }).catch(cb);
 }
 Client.prototype.getPins = function(cb){
-    client.fetchJSON("/api/pins",JSON.stringify({}),cb);
+    client.getJson("/api/pins",{method:"POST",jsonBody:{}})
+        .then(function(pins){
+            cb(null,pins);
+        }).catch(cb);
 }
 Client.prototype.updatePin = function(id,data,cb){
-    client.fetch("/api/pins/"+id+"/update",JSON.stringify(data),cb);
+    client.execute("/api/pins/"+id+"/update",{method:"POST",jsonBody:data})
+        .then(function(){
+            cb(null);
+        }).catch(cb);
 }
 Client.prototype.deletePin = function(id,cb){
-    client.fetch("/api/pins/"+id+"/delete",null,cb);
+    client.execute("/api/pins/"+id+"/delete",{method:"POST"})
+        .then(function(){
+            cb(null);
+        }).catch(cb);
 }
 Client.prototype.login = function(pin,cb){
-    client.fetchJSON("/api/pins/login",JSON.stringify({pin:pin}),function(err,session){
-        if(err) return cb(err);
-        cookie.set("session",session._id,{expires:60*60*24*365*100});
-        client.getSession(cb);
-    });
+    client.getJson("/api/pins/login",{method:"POST",jsonBody:{pin:pin}})
+        .then(function(session){
+            cookie.set("session",session._id,{expires:60*60*24*365*100});
+            client.getSession().then(function(sess){
+                cb(null,sess);
+            }).catch(cb);
+        })
+        .catch(cb)
+
 }

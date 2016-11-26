@@ -1,15 +1,15 @@
 var mongo = require("mongodb");
 var parse = require("co-body");
-module.exports = function*(){
-    var body = yield parse.json(this);
-    var pin = new this.app.db.Pin({
+module.exports = async function(ctx){
+    var body = await parse.json(ctx);
+    var pin = new ctx.app.db.Pin({
         _id:body._id,
         pin:body.pin,
         full:body.full,
         rules:[]
     });
-    pin = yield pin.save();
+    pin = await pin.save();
 
-    this.set("Content-Type","text/plain");
-    this.body = JSON.stringify(pin._id);
+    ctx.set("Content-Type","text/plain");
+    ctx.body = JSON.stringify(pin._id);
 };

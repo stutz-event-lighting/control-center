@@ -1,8 +1,8 @@
 var mongo = require("mongodb");
 var parse = require("co-body");
 var crypto = require("crypto");
-module.exports = function*(){
-    var body = yield parse.json(this);
+module.exports = async function(ctx){
+    var body = await parse.json(ctx);
 
     var now = new Date();
     var date = now.getTime();
@@ -10,9 +10,9 @@ module.exports = function*(){
     var day = now.getDay()-1;
     if(day < 0) day = 6;
 
-    var pin = yield this.app.db.model("pins").findOne({pin:body.pin}).populate("_id");
+    var pin = await ctx.app.db.model("pins").findOne({pin:body.pin}).populate("_id");
 
-    if(!pin) this.throw(403);
+    if(!pin) ctx.throw(403);
 
     if(pin.rules && pin.rules.length){
         for(var rule of pin.rules){
@@ -23,20 +23,20 @@ module.exports = function*(){
                 (rule.timeFrom && rule.timeFrom > time) ||
                 (rule.timeTo && rule.timeTo < time)
             ){
-                this.throw(403);
+                ctx.throw(403);
             }
         }
     }
     var base = ["outdoorlight","outerdoor"];
     var full = base.concat(["gate","innerdoor","alloff"]);
 
-    var session = new this.app.db.Session({
+    var session = new ctx.app.db.Session({
         _id: crypto.randomBytes(16).toString("hex"),
         user:pin._id._id,
         permissions:pin._id.roles.indexOf("user")>=0?pin._id.permissions:(pin.full?full:base)
     })
 
-    yield session.save();
-    this.set("Content-Type","application/json");
-    this.body = JSON.stringify(session);
+    await session.save();
+    ctx.set("Content-Type","application/json");
+    ctx.body = JSON.stringify(session);
 }

@@ -6,9 +6,10 @@ var async = require("async");
 var byline = require("byline");
 var url = require("url");
 var suncalc = require("suncalc");
-var fs = require("co-fs");
+var fs = require("fs-promise");
 var path = require("path");
-var co = require("co");
+
+require("babel-polyfill");
 
 var HUT = require("./relais/hut.js");
 var devices = require("../devices.js");
@@ -25,6 +26,7 @@ var WorkshopLight = require("./devices/WorkshopLight.js");
 var Sonos = require("./devices/Sonos.js");
 var Door = require("./devices/Door.js");
 var Bell = require("./devices/Bell.js");
+
 
 var Controller = module.exports = function Controller(config){
     this.config = config;
@@ -83,7 +85,7 @@ Controller.prototype.start = function(){
         this.addDevice("workshoplight",new WorkshopLight(r1.relays[0],r1.relays[1]));
         this.addDevice("alloff",new AllOff(r1.ios[4],this.devices.mainlight,this.devices.officelight,this.devices.outdoorlight,[r1.relays[0],r1.relays[1]],this.devices.sonos,this.devices.innerdoor,this.devices.outerdoor));
         this.addDevice("bell",new Bell(this.devices.outdoorlight,this.config.url));
-        this.loadControllers().catch(function(err){console.log("could not load controllers!")});
+        this.loadControllers().catch(function(err){console.log(err,"could not load controllers!")});
         this.outdoorLightLED = r2.relays[2];
         setInterval(this.setOutdoorTabletLEDState.bind(this),60*1000);
         this.setOutdoorTabletLEDState();
@@ -104,12 +106,12 @@ Controller.prototype.addDevice = function(name,device){
     }.bind(this));
 }
 
-Controller.prototype.loadControllers = co.wrap(function*(){
-    var controllers = yield fs.readdir(path.resolve(__dirname,"./controllers"));
+Controller.prototype.loadControllers = async function(){
+    var controllers = await fs.readdir(path.resolve(__dirname,"./controllers"));
     for(var i = 0; i < controllers.length; i++){
         require("./controllers/"+controllers[i])(this);
     }
-});
+}
 
 Controller.prototype.onConnection = function(c){
     var params = url.parse(c.upgradeReq.url,true).query;

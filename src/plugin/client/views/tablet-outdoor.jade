@@ -130,9 +130,9 @@ script(section="body").
             if(client.hasPermission("innerdoor")) setTimeout(function(){self.client.devices.innerdoor.setLocked(false);},2000);
             self.forceUpdate();
             logoutTimeout = setTimeout(function(){
-                client.deleteSession(function(){
+                client.deleteSession().then(function(){
                     self.forceUpdate();
-                })
+                });
             },30000);
         })
     }

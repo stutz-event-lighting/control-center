@@ -6,19 +6,19 @@ var request = require("request");
 var WebSocket = require("ws");
 
 module.exports = router
-	.post("/:device/:command",function*(){
-		if(!devices[this.params.device] || !devices[this.params.device].public){
-			yield ensure(this.app.db,this.cookies.get("session"),this.params.device);
+	.post("/:device/:command",async function(ctx){
+		if(!devices[ctx.params.device] || !devices[ctx.params.device].public){
+			await ensure(ctx.app.db,ctx.cookies.get("session"),ctx.params.device);
 		}
-		this.body = this.req.pipe(request.post({
-			url:"http://localhost:"+this.app.controlCenter.config.port+"/"+this.params.device+"/"+this.params.command,
-			headers:this.headers
+		ctx.body = ctx.req.pipe(request.post({
+			url:"http://localhost:"+ctx.app.controlCenter.config.port+"/"+ctx.params.device+"/"+ctx.params.command,
+			headers:ctx.headers
 		}))
 	})
-	.get("",function*(){
-		var session = (yield getSession(this.app.db,this.cookies.get("session")))||{permissions:[]};
-		var c = yield this.upgrade();
-		var con = new WebSocket("ws://localhost:"+this.app.controlCenter.config.port+"/").on("open",function(){
+	.get("",async function(ctx){
+		var session = (await getSession(ctx.app.db,ctx.cookies.get("session")))||{permissions:[]};
+		var c = await ctx.upgrade();
+		var con = new WebSocket("ws://localhost:"+ctx.app.controlCenter.config.port+"/").on("open",function(){
 			con.on("message",function(msg){
 				msg = JSON.parse(msg);
 				for(var device in msg){
@@ -31,6 +31,6 @@ module.exports = router
 		con.on("close",function(){c.close()});
 		c.on("error",function(){con.close()});
 		c.on("close",function(){con.close()});
-		this.respond = false;
+		ctx.respond = false;
 	})
 	.middleware();
