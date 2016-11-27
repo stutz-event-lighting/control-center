@@ -18,9 +18,10 @@ class Shutters extends Device{
 
     async scheduleStop(time,cb){
         this.clear();
-        return new Promise((s)=>{
+        await new Promise((s)=>{
             this.timeout = setTimeout(s,time);
         });
+        await this.stop();
     }
 
     async stop(){
