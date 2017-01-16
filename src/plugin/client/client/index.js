@@ -53,3 +53,5 @@ class DeviceClient extends EventEmitter{
         if(this.state != "disconnected") this.socket.close();
     }
 }
+
+module.exports = DeviceClient;

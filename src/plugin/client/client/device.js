@@ -18,7 +18,7 @@ class Device{
                                 s();
                             }
                         }
-                        req.send(JSON.stringify());
+                        req.send(JSON.stringify(args));
                     })
                 }
             })(commands[i])
