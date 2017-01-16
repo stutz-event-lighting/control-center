@@ -1,6 +1,6 @@
 {
   "name": "control-center",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "The electronics controller for the Stutz Event Lighting warehouse",
   "main": "index.js",
   "scripts": {
@@ -23,6 +23,7 @@
     "koa-mount": "^2.0.0",
     "koa-router": "^7.0.1",
     "koa-static": "^3.0.0",
+    "koa-upgrade": "^1.0.1",
     "moment": "^2.14.1",
     "mongoose": "^4.4.5",
     "node-hue-api": "^1.0.5",
