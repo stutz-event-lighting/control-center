@@ -15,7 +15,7 @@ class OfficeLight extends Device{
     async init(){
         var results = await pify(hue.nupnpSearch.bind(hue))()
         if(!results.length) return;
-    	this.api = new hue.HueApi(result[0].ipaddress,user);
+    	this.api = new hue.HueApi(results[0].ipaddress,this.user);
     	await this.updateScenes();
     }
 

@@ -87,7 +87,7 @@ class Controller{
         this.addDevice("workshoplight",new WorkshopLight(r1.relays[0],r1.relays[1]));
         this.addDevice("alloff",new AllOff(r1.ios[4],this.devices.mainlight,this.devices.officelight,this.devices.outdoorlight,[r1.relays[0],r1.relays[1]],this.devices.sonos,this.devices.innerdoor,this.devices.outerdoor));
         this.addDevice("bell",new Bell(this.devices.outdoorlight,this.config.url));
-        this.loadControllers().catch(function(err){console.log(err,"could not load controllers!")});
+        this.loadControllers(this).catch(function(err){console.log(err,"could not load controllers!")});
         this.outdoorLightLED = r2.relays[2];
         setInterval(this.setOutdoorTabletLEDState.bind(this),60*1000);
         this.setOutdoorTabletLEDState();
