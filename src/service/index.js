@@ -1,5 +1,4 @@
 var http = require("http");
-var ws = require("ws");
 var byline = require("byline");
 var url = require("url");
 var suncalc = require("suncalc");
