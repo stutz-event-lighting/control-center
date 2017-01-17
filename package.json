@@ -1,6 +1,6 @@
 {
   "name": "control-center",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "The electronics controller for the Stutz Event Lighting warehouse",
   "main": "index.js",
   "scripts": {

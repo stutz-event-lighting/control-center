@@ -8,7 +8,7 @@ var checkDark = require("../checkDark");
 
 module.exports = function(controller){
 	controller.devices.gate.on("change",function(){
-		if(controller.devices.gate.state == "opening"){
+		if(controller.devices.gate.state.state == "opening"){
 			if(controller.devices.mainlight.state.status == "off") controller.devices.mainlight.turnHalfOn();
 			if(checkDark() && !controller.devices.outdoorlight.state.on) controller.devices.outdoorlight.turnOn();
 		}
