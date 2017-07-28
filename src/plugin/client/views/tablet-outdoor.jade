@@ -116,7 +116,7 @@ script(section="body").
         this.forceUpdate();
     }
 
-    async login (){
+    async login(){
         var self = this;
         try{
             await cli.login(this.state.code);
@@ -130,7 +130,7 @@ script(section="body").
         if(client.hasPermission("outerdoor")) self.client.devices.outerdoor.setLocked(false);
         if(client.hasPermission("innerdoor")) setTimeout(function(){self.client.devices.innerdoor.setLocked(false);},2000);
         self.forceUpdate();
-        logoutTimeout = setTimeout(function(){
+        logoutTimeout = setTimeout(async ()=>{
             await client.deleteSession();
             self.forceUpdate();
         },30000);

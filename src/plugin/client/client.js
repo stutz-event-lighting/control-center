@@ -3,16 +3,16 @@ var cookie = require("cookies-js");
 
 class Client{
     async createPin(data){
-        return await client.getText("/api/pins/create",{method:"POST",jsonBody:data});
+        return await client.getText("/api/pins",{method:"POST",jsonBody:data});
     }
     async getPins(){
-        return await client.getJson("/api/pins",{method:"POST",jsonBody:{}});
+        return await client.getJson("/api/pins",{method:"GET"});
     }
     async updatePin(id,data){
-        return await client.execute("/api/pins/"+id+"/update",{method:"POST",jsonBody:data});
+        return await client.execute("/api/pins/"+id,{method:"PATCH",jsonBody:data});
     }
     async deletePin(id){
-        return await client.execute("/api/pins/"+id+"/delete",{method:"POST"});
+        return await client.execute("/api/pins/"+id,{method:"DELETE"});
     }
     async login(pin,cb){
         var session = await client.getJson("/api/pins/login",{method:"POST",jsonBody:{pin:pin}});

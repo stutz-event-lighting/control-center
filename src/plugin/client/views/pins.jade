@@ -112,6 +112,7 @@ script(section="body").
         }else if(this.state.delete){
             await client.deletePin(this.state.delete._id._id);
         }
+        delete this.state.pin;
         delete this.state.delete;
         this.loadData();
     }
