@@ -17,6 +17,7 @@ class Client{
     async login(pin,cb){
         var session = await client.getJson("/api/pins/login",{method:"POST",jsonBody:{pin:pin}});
         cookie.set("session",session._id,{expires:60*60*24*365*100});
+        return session;
     }
 }
 

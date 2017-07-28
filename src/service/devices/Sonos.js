@@ -4,8 +4,13 @@ var pify = require("pify");
 
 class Sonos extends Device{
     async getDevice(){
-        var device = await pify(sonos.search.bind(sonos))()
-        return new sonos.Sonos(device.host);
+        return await new Promise((s)=>{
+            sonos.search(async function(device){
+                device = new sonos.Sonos(device.host);
+                var track = await pify(device.currentTrack.bind(device))();
+                if(track.title) s(device);
+            })
+        });
     }
 
     async play(cb){

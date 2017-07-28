@@ -1,5 +1,4 @@
 var http = require("http");
-var ws = require("ws");
 var byline = require("byline");
 var url = require("url");
 var suncalc = require("suncalc");
@@ -48,7 +47,7 @@ class Controller{
                 var c = await ctx.upgrade();
                 this.onConnection(c);
                 ctx.respond = false;
-            })
+            }.bind(this))
             .get("/:device",async function(ctx){
                 if(!this.devices[ctx.params.device]) return;
                 ctx.set("Cotent-Type","application/json");
@@ -58,6 +57,7 @@ class Controller{
                 var body = await parse.json(ctx);
                 var device = this.devices[ctx.params.device];
                 if(device && devices[ctx.params.device].commands.indexOf(ctx.params.command)>=0) await device[ctx.params.command].apply(device,body);
+                ctx.status = 200;
             }.bind(this))
             .routes()
         );
@@ -87,12 +87,12 @@ class Controller{
         this.addDevice("workshoplight",new WorkshopLight(r1.relays[0],r1.relays[1]));
         this.addDevice("alloff",new AllOff(r1.ios[4],this.devices.mainlight,this.devices.officelight,this.devices.outdoorlight,[r1.relays[0],r1.relays[1]],this.devices.sonos,this.devices.innerdoor,this.devices.outerdoor));
         this.addDevice("bell",new Bell(this.devices.outdoorlight,this.config.url));
-        this.loadControllers().catch(function(err){console.log(err,"could not load controllers!")});
+        this.loadControllers(this).catch(function(err){console.log(err,"could not load controllers!")});
         this.outdoorLightLED = r2.relays[2];
         setInterval(this.setOutdoorTabletLEDState.bind(this),60*1000);
         this.setOutdoorTabletLEDState();
 
-        this.server.listen(this.config.port);
+        this.app.listen(this.config.port);
     }
 
     addDevice(name,device){

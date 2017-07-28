@@ -116,23 +116,24 @@ script(section="body").
         this.forceUpdate();
     }
 
-    async login(){
-        var self = this;
+    async login (){
         try{
-            await cli.login(this.state.code);
-            self.state.code = "";
+            client.session = await cli.login(this.state.code);
+            client.session.user = await client.getContact(client.session.user);
+            
+            this.state.code = "";
         }catch(err){
-            self.state.showPinError = true;
-            self.state.code = "";
-            self.forceUpdate();
+            this.state.showPinError = true;
+            this.state.code = "";
+            this.forceUpdate();
             return;
         }
-        if(client.hasPermission("outerdoor")) self.client.devices.outerdoor.setLocked(false);
-        if(client.hasPermission("innerdoor")) setTimeout(function(){self.client.devices.innerdoor.setLocked(false);},2000);
-        self.forceUpdate();
-        logoutTimeout = setTimeout(async ()=>{
+        if(client.hasPermission("outerdoor")) this.client.devices.outerdoor.setLocked(false);
+        if(client.hasPermission("innerdoor")) setTimeout(function(){this.client.devices.innerdoor.setLocked(false);}.bind(this),2000);
+        this.forceUpdate();
+        logoutTimeout = setTimeout(async()=>{
             await client.deleteSession();
-            self.forceUpdate();
+            this.forceUpdate();
         },30000);
     }
     

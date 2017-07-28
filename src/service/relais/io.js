@@ -1,7 +1,8 @@
 var EventEmitter = require("events").EventEmitter;
 
-class IO{
+class IO extends EventEmitter{
     constructor(hut,index,value){
+        super();
         this.hut = hut;
         this.index = index;
         this.value = value;

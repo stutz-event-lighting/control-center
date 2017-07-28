@@ -15,7 +15,7 @@ class Relay extends IO{
         if(this.value == value) return;
         await new Promise((s)=>{
             this.targetValue = value;
-            this.once("change",cb);
+            this.once("change",s);
             this.check();
         });
     }

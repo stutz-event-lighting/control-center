@@ -7,10 +7,10 @@ var checkDark = require("../checkDark");
 */
 
 module.exports = function(controller){
-	controller.gate.on("change",function(){
-		if(controller.gate.state == "opening"){
-			if(controller.mainlight.state.status == "off") controller.mainlight.turnHalfOn();
-			if(checkDark() && !controller.outdoorlight.state.on) controller.outdoorlight.turnOn();
+	controller.devices.gate.on("change",function(){
+		if(controller.devices.gate.state.state == "opening"){
+			if(controller.devices.mainlight.state.status == "off") controller.devices.mainlight.turnHalfOn();
+			if(checkDark() && !controller.devices.outdoorlight.state.on) controller.devices.outdoorlight.turnOn();
 		}
 	});
 }
