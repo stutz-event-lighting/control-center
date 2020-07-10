@@ -1,0 +1,24 @@
+div
+    if this.listen && this.client.state != "connected"
+        .alert.alert-warning= this.client.state=="connecting"?"Verbinung wird hergestellt...":"Verbindung verloren. Erneut verbinden in "+this.client.timeUntilReconnect+"s..."
+    block content
+script.
+    var DeviceClient = require("../client/index");
+script(section="body").
+    constructor(props,context){
+        super(props,context);
+        this.state = {};
+    }
+    
+    componentWillUnmount(){
+        this.client.disconnect();
+    }
+
+    componentWillMount(){ 
+        this.client = new DeviceClient();
+        this.client.on("change",()=>{
+            this.forceUpdate();
+        })
+        this.client.listen();
+    }
+    

@@ -1,0 +1,120 @@
+extends ./tablet-indoor
+append content
+    style.
+        h1{
+            text-align:center;
+        }
+        .btn{
+            width:100%;
+            font-size:30px;
+            line-height:60px;
+            margin-top:30px;
+        }
+    .col-xs-3
+        h1 Tor
+        .btn.btn-primary(onClick=this.gateOpen.bind(this)) Auf
+        .btn.btn-primary(onClick=this.gateStop.bind(this)) Stop
+        .btn.btn-primary(onClick=this.gateClose.bind(this)) Zu
+    .col-xs-3
+        h1 Lager Licht
+        .btn.btn-success(onClick=this.mainlightOn.bind(this)) An
+        .btn.btn-success(onClick=this.mainlightHalfOn.bind(this)) Halb
+        .btn.btn-success(onClick=this.mainlightOff.bind(this)) Aus
+    .col-xs-3
+        h1 Aussen Licht
+        .btn.btn-success(onClick=this.outdoorlightOn.bind(this)) An
+        .btn.btn-success(onClick=this.outdoorlightOff.bind(this)) Aus 
+    .col-xs-3
+        h1 Lager
+        .btn.btn-warning(onClick=this.sonosPlay.bind(this)) Sonos play
+        .btn.btn-warning(onClick=this.lockDoors.bind(this)) Verriegeln
+        .btn.btn-warning(onClick=this.unlockDoors.bind(this)) Entriegeln
+        .btn.btn-danger(onClick=this.goHome.bind(this)) Go Home
+    if this.state.goHomeCountdown
+        Modal
+            .modal-header
+                h2="Selbstzerstörung in "+this.state.goHomeCountdown+"s..."
+            .modal-footer
+                button.btn.btn-default(onClick=this.abortGoHome.bind(this)) Abbrechen
+script.
+    var DeviceClient = require("../client/index");
+    var checkDark = require("../../server/checkDark");
+    var Modal = require("./modal");
+script(section="body").
+    gateOpen(){
+        this.client.devices.gate.open();
+    }
+    
+    gateClose(){
+        this.client.devices.gate.close();
+    }
+    
+    gateStop(){
+        this.client.devices.gate.stop();
+    }
+    
+    goHome(){
+        if(checkDark()){
+            this.outdoorlightOn();
+        }
+        this.state.goHomeCountdown = 30;
+        this.goHomeInterval= setInterval(function(){
+            if(--this.state.goHomeCountdown <= 0){
+                clearInterval(this.goHomeInterval);
+                this.mainlightOff();
+                this.client.devices.workshoplight.turnOff();
+                this.lockDoors();
+                this.sonosPause();
+                this.client.devices.officelight.setSceneByName("Aus");
+                setTimeout(function(){
+                    this.outdoorlightOff();
+                }.bind(this),3*60*1000)
+            }
+            this.forceUpdate();
+        }.bind(this),1000);
+        this.forceUpdate();
+    }
+    
+    abortGoHome(){
+        clearInterval(this.goHomeInterval);
+        delete this.state.goHomeCountdown;
+        this.forceUpdate()
+    }
+    
+    mainlightOn(){
+        this.client.devices.mainlight.turnOn();
+    }
+    
+    mainlightHalfOn(){
+        this.client.devices.mainlight.turnHalfOn();
+    }
+    
+    mainlightOff(){
+        this.client.devices.mainlight.turnOff();
+    }
+    
+    outdoorlightOn(){
+        this.client.devices.outdoorlight.turnOn();
+    }
+    
+    outdoorlightOff(){
+        this.client.devices.outdoorlight.turnOff();
+    }
+    
+    sonosPlay(){
+        this.client.devices.sonos.play();
+    }
+    
+    sonosPause(){
+        this.client.devices.sonos.pause();
+    }
+    
+    lockDoors(){
+        this.client.devices.innerdoor.setAutoLock(true);
+        this.client.devices.outerdoor.setAutoLock(true);
+    }
+    
+    unlockDoors(){
+        this.client.devices.innerdoor.setAutoLock(false);
+        this.client.devices.outerdoor.setAutoLock(false);
+    }

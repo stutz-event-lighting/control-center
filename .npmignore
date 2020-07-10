@@ -1,3 +1,5 @@
 src
 config.json
 gulpfile.js
+docker-compose.yml
+shell.nix

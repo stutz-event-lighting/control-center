@@ -1,0 +1,40 @@
+#sel
+	if this.props.route.name == "rootPlugin"
+		= this.props.route.render({})
+	else
+		Navbar(fixedTop)
+			Header
+				Brand AIOC Lager
+				Toggle
+			Collapse
+				Nav(className="bs-navbar-collapse" role="navigation" eventKey=0,id="top")
+					each entry,name in menu
+						li(className=this.props.route.name==entry.name?"active":"")
+							a(onClick=this.goTo.bind(this,entry.url) style="cursor:pointer")= name
+		div(style="paddingTop:60px")
+			= this.props.route.render({})
+script(section="body").
+	goTo(url){
+		this.props.location.push(url);
+	}
+script.
+	var {Router} = require("react-route-system");
+	var Navbar = require("react-bootstrap/lib/Navbar");
+	var {Collapse,Toggle,Brand,Header} = Navbar;
+	var Nav = require("react-bootstrap/lib/Nav");
+	var NavDropdown = require("react-bootstrap/lib/NavDropdown");
+	var MenuItem = require("react-bootstrap/lib/MenuItem");
+	var Button = require("react-bootstrap/lib/Button");
+	
+	var menu = module.exports.menu = Component.menu = {
+		"Elektronik":{url:"/",name:"electronic"},
+		"Zugänge":{url:"/pins",name:"pins"}
+	}
+	
+	Component.router = new Router()
+		.add("electronic","",require("./electronic"))
+		.add("pins","/pins",require("./pins"))
+		.add("rootPlugin","/tablet-office",require("./tablet-office"))
+		.add("rootPlugin","/tablet-stairs",require("./tablet-stairs"))
+		.add("rootPlugin","/tablet-bistro",require("./tablet-bistro"))
+		.add("rootPlugin","/tablet-outdoor",require("./tablet-outdoor"))

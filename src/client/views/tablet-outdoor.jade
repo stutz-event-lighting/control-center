@@ -1,0 +1,178 @@
+div
+    style.
+        html,body{
+            height:100vh;
+            width:100vw;
+            margin:0px;
+            padding:0px;
+        }
+        .col-xs-9, .btn{
+            margin-top:20px;
+        }
+        .btn, html body input.form-control{
+            font-size:76px;
+            display:block;
+            height:10%;
+        }
+        .col-xs-3 .btn, .col-xs-4 .btn{
+            font-size:50px;
+        }
+        .btn{
+            width:100%;
+        }
+        .modal .btn{
+            width:auto;
+            font-size:30px;
+        }
+        html body input.form-control{
+            text-align:center;
+        }
+        
+    if !this.state.pin
+        .col-xs-9
+            input.form-control.block-field(type="text" ref="code" value=new Array((this.state.code||"").length+1).join("*") onFocus=function(e){e.target.blur()})
+            .row
+                .col-xs-4
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clickNum(7)) 7
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clickNum(4)) 4
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clickNum(1)) 1
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clear.bind(this)) DEL
+                .col-xs-4
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clickNum(8)) 8
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clickNum(5)) 5
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clickNum(2)) 2
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clickNum(0)) 0
+                .col-xs-4
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clickNum(9)) 9
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clickNum(6)) 6
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.clickNum(3)) 3
+                    .btn.btn-default(style="width:100%;background:white;border:1px solid #ccc" onTouchStart=this.login.bind(this)) OK
+        .col-xs-3
+            .btn.btn-danger(style="width:100%;border:1px solid #ccc;marginTop:162px" onTouchStart=this.bellLight.bind(this)) Licht
+            .btn.btn-warning(style="width:100%;height:295px;border:1px solid #ccc" onTouchStart=this.bellRing.bind(this))
+                i.glyphicon.glyphicon-bell(style="lineHeight:260px")
+    else
+        if this.state.pin.full
+            .col-xs-12
+                h1= "Willkommen, "+this.state.pin.name
+            .col-xs-3
+                h1 Tor
+                .btn.btn-primary(onTouchStart=this.openGate.bind(this)) Öffnen
+                .btn.btn-primary(onTouchStart=this.stopGate.bind(this)) Stoppen
+                .btn.btn-primary(onTouchStart=this.closeGate.bind(this)) Schliessen
+            .col-xs-3
+                h1 Aussenlicht
+                .btn.btn-success(onTouchStart=this.outdoorlightOn.bind(this)) An
+                .btn.btn-success(onTouchStart=this.outdoorlightOff.bind(this)) Aus
+            .col-xs-3
+                h1 Türen
+                .btn.btn-warning(onClick=this.lockDoors.bind(this)) Verriegeln
+                .btn.btn-warning(onClick=this.unlockDoors.bind(this)) Entriegeln
+            .col-xs-3
+                h1 Feierabend
+                .btn.btn-danger(onClick=this.allOff.bind(this)) Go Home
+        else
+            div(style="height:100%;line-height:800px;text-align:center;font-size:100px") Bitte eintreten
+    if this.state.showPinError
+        Modal
+            .modal-header
+                h2 Die eingegebene PIN ist ungültig!
+            .modal-footer
+                button.btn.btn-primary.pull-right(onClick=this.closePinError.bind(this)) Nochmals probieren
+script.
+    var DeviceClient = require("../client/index");
+    var Modal = require("./modal");
+    var cli = require("../client");
+    
+    var logoutTimeout;
+script(section="body").
+    constructor(props,context){
+        super(props,context);
+        this.state = {};
+    }    
+    async componentWillMount(){
+        this.client = new DeviceClient();
+    }
+    
+    clickNum(num){
+        var self = this;
+        return function(e){
+            self.state.code = (self.state.code||"")+num;
+            e.target.blur()
+            self.forceUpdate();
+        }
+    }
+    clear(){
+        this.state.code = "";
+        this.forceUpdate();
+    }
+
+    async login (){
+        try{
+            this.state.pin = await cli.login(this.state.code);
+            this.state.code = "";
+        }catch(err){
+            this.state.showPinError = true;
+            this.state.code = "";
+            this.forceUpdate();
+            return;
+        }
+        if(this.state.pin.full){
+            this.client.devices.outerdoor.setLocked(false);
+            setTimeout(function(){
+                this.client.devices.innerdoor.setLocked(false);
+            }.bind(this),2000);
+        }
+        this.forceUpdate();
+        logoutTimeout = setTimeout(async()=>{
+            this.state.pin = null;
+            this.forceUpdate();
+        },30000);
+    }
+    
+    openGate(){
+        this.client.devices.gate.open();
+    }
+    
+    stopGate(){
+        this.client.devices.gate.stop();
+    }
+    
+    closeGate(){
+        this.client.devices.gate.close();
+    }
+    
+    allOff(){
+        this.client.devices.alloff.off();
+    }
+    
+    outdoorlightOn(){
+        this.client.devices.outdoorlight.turnOn();
+    }
+    
+    outdoorlightOff(){
+        this.client.devices.outdoorlight.turnOff();
+    }
+    
+    closePinError(){
+        delete this.state.showPinError;
+        this.forceUpdate();
+    }
+    
+    lockDoors(){
+        if(client.hasPermission("innerdoor")) this.client.devices.innerdoor.setAutoLock(true);
+        if(client.hasPermission("outerdoor")) this.client.devices.outerdoor.setAutoLock(true);
+    }
+    
+    unlockDoors(){
+        if(client.hasPermission("innerdoor")) this.client.devices.innerdoor.setAutoLock(false);
+        if(client.hasPermission("outerdoor")) this.client.devices.outerdoor.setAutoLock(false);
+    }
+    
+    bellRing(){
+        this.client.devices.bell.ring();
+    }
+    
+    bellLight(){
+        this.client.devices.bell.light();
+    }
