@@ -18,7 +18,7 @@ class DeviceClient extends EventEmitter {
     this.autoreconnect = true;
     this.state = "connecting";
     delete this.timeUntilReconnect;
-    this.socket = new WebSocket("ws://" + location.host + "/api/electronic");
+    this.socket = new WebSocket("ws://" + location.host + "/api/devices");
     this.emit("change");
 
     this.socket.onopen = () => {

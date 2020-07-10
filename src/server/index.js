@@ -65,12 +65,14 @@ class Controller {
         compose([
           require("./api"),
           mount(
-            "/devies",
+            "/devices",
             Router()
               .get(
                 "/",
                 async function (ctx) {
-                  if (ctx.get("Connection") != "Upgrade") return;
+                  if (!ctx.get("Connection").includes("Upgrade")) {
+                    return;
+                  }
                   // TODO authenticate!
                   var c = await ctx.upgrade();
                   this.onConnection(c);
