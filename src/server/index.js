@@ -155,7 +155,7 @@ class Controller {
   updateTablets() {
     setTimeout(() => {
       for (var ip in this.config.tablets) {
-        updateTablet(ip, this.config.url + this.config.tablets[ip]);
+        updateTablet(ip, "http://"+this.config.url + this.config.tablets[ip]);
       }
     }, 1000);
   }
