@@ -19,6 +19,7 @@ require("babel-polyfill");
 var HUT = require("./relais/hut.js");
 var devices = require("../devices.js");
 var checkDark = require("./checkDark.js");
+var updateTablet = require("./updateTablet");
 
 // Devices
 var AllOff = require("./devices/AllOff.js");
@@ -154,7 +155,7 @@ class Controller {
   updateTablets() {
     setTimeout(() => {
       for (var ip in this.config.tablets) {
-        updateTablet(ip, this.boxify.config.url + this.config.tablets[ip]);
+        updateTablet(ip, this.config.url + this.config.tablets[ip]);
       }
     }, 1000);
   }
