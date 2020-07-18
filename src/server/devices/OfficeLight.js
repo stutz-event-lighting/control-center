@@ -14,21 +14,34 @@ class OfficeLight extends Device{
     }
 
     async init(){
-      console.log("searching for hue controllers...");
-      var results = await hue.discovery.nupnpSearch();
-      console.log("found hue controllers:",results);
-      if(!results.length) return;
-    	this.api = await hue.api.createLocal(results[0].ipaddress).connect(this.user);
+    	this.api = await hue.api.createInsecureLocal("192.168.1.37").connect(this.user);
       console.log("connected to hue");
     	await this.updateScenes();
     }
 
     async updateScenes(){
-        var scenes = await this.api.scenes();
-        this.set("scenes",scenes
-            .filter((scene)=>scene.name.indexOf("boxify-") == 0)
-            .map((scene)=>({id:scene.id,name:scene.name.substr(7)}))
-        )
+        this.set("scenes",[{
+          id:"node-hue-api-11",
+          name:"Go Home"
+        },{
+          id:"node-hue-api-26",
+          name:"Event-Durchgang"
+        },{
+          id:"node-hue-api-17",
+          name:"Blue"
+        },{
+          id:"node-hue-api-21",
+          name:"Fäbu Work"
+        },{
+          id:"node-hue-api-9",
+          name:"An"
+        },{
+          id:"node-hue-api-14",
+          name:"Chillen"
+        },{
+          id:"node-hue-api-6",
+          name:"Aus"
+        }])
     }
 
     async createScene(name){
@@ -40,15 +53,15 @@ class OfficeLight extends Device{
             }
         }
         if(id){
-            await this.api.updateScene(id,[1,2,3,4,5,6,7,8,9],"boxify-"+name);
+            await this.api.scenes.updateScene(id,[1,2,3,4,5,6,7,8,9],"boxify-"+name);
         }else{
-            await this.api.createScene([1,2,3,4,5,6,7,8,9],"boxify-"+name);
+            await this.api.scenes.createScene([1,2,3,4,5,6,7,8,9],"boxify-"+name);
         }
         this.updateScenes();
     }
 
     async setScene(id){
-        await this.api.activateScene(id)
+        await this.api.scenes.activateScene(id)
     }
 
     async setSceneByName(name){
@@ -62,7 +75,7 @@ class OfficeLight extends Device{
     }
 
     async deleteScene(id){
-        await this.api.updateScene(id,[1,2,3,4,5,6,7,8,9],"boxify");
+        await this.api.scenes.updateScene(id,[1,2,3,4,5,6,7,8,9],"boxify");
         this.updateScenes();
     }
 }
