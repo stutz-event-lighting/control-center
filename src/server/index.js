@@ -44,25 +44,19 @@ class Controller {
 
     upgrade(this.app);
 
-    this.app.use(async (ctx, next) => {
-      const authorization = ctx.get("Authorization");
-      const requiredAuthorization =
-        "Basic " +
-        Buffer.from("aioc:" + this.config.password).toString("base64");
-
-      if (authorization != requiredAuthorization) {
-        ctx.set("WWW-Authenticate", 'Basic realm="RealmName"');
-        ctx.status = 401;
-      } else {
-        ctx.db = this.db;
-        await next();
-      }
-    });
-
     this.app.use(
       mount(
         "/api",
         compose([
+          async (ctx, next) => {
+            const cookie = ctx.get("Cookie");
+            if (!(cookie||"").includes("Password="+this.config.password)) {
+              ctx.status = 401;
+            } else {
+              ctx.db = this.db;
+              await next();
+            }
+          },
           require("./api"),
           mount(
             "/devices",

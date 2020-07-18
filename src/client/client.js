@@ -2,6 +2,7 @@ class Client {
   async getResponse(url, opts) {
     opts = opts || {};
     opts.headers = opts.headers || {};
+    opts.headers.Password = this.password || "";
     if (!opts.body && opts.jsonBody) {
       opts.body = JSON.stringify(opts.jsonBody);
       opts.headers["Content-Type"] = "application/json";
@@ -56,6 +57,20 @@ class Client {
       jsonBody: { pin: pin },
     });
     return pin;
+  }
+  async init(){
+    while(true){
+      try{
+        await this.getResponse("/api/");
+        break;
+      }catch(e){
+        if(e.message == "Unauthorized"){
+          document.cookie = "Password="+prompt("Passwort:")
+        }else{
+          throw e;
+        }
+      }
+    }
   }
 }
 

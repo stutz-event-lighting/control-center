@@ -24,6 +24,7 @@ Object.assign = function (obj) {
 
 window.onload = async function () {
   try {
+    await client.init();
     ReactDOM.render(
       React.createElement(RootComponent, { component: App }),
       document.body
