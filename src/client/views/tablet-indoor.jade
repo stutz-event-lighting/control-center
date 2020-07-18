@@ -7,18 +7,22 @@ script.
 script(section="body").
     constructor(props,context){
         super(props,context);
+        this.listen = true;
         this.state = {};
     }
-    
+
     componentWillUnmount(){
+      if(this.client){
         this.client.disconnect();
+      }
     }
 
-    componentWillMount(){ 
+    componentWillMount(){
         this.client = new DeviceClient();
         this.client.on("change",()=>{
             this.forceUpdate();
         })
-        this.client.listen();
+        if(this.listen){
+          this.client.listen();
+        }
     }
-    

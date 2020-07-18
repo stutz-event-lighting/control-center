@@ -150,6 +150,7 @@ class Controller {
         <link rel="icon" href="/public/icon.png" sizes="48x48" type="image/png"/>
     </head>
     <body>
+        <script>window.onerror = function(message,a,line){alert(message+":"+line)}</script>
         <script src='/main.js'></script>
     </body>
 </html>`;

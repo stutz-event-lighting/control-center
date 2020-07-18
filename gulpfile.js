@@ -9,6 +9,7 @@ var transform = require("gulp-transform");
 var jade2react = require("jade2react");
 var babel = require("gulp-babel");
 var cp = require("child_process");
+var babelify = require("babelify");
 
 function buildJade(w) {
   return (w
@@ -17,12 +18,6 @@ function buildJade(w) {
   )
     .pipe(replaceExt(".js"))
     .pipe(transform((code) => jade2react.compile(code.toString("utf8"))))
-    .pipe(
-      babel({
-        presets: ["es2015"],
-        plugins: ["syntax-async-functions", "transform-regenerator"],
-      })
-    )
     .pipe(gulp.dest("lib"));
 }
 
@@ -31,12 +26,6 @@ function buildJs(w) {
     ? watch("src/**/*.js", { ignoreInitial: true })
     : gulp.src("src/**/*.js")
   )
-    .pipe(
-      babel({
-        presets: ["es2015"],
-        plugins: ["syntax-async-functions", "transform-regenerator"],
-      })
-    )
     .pipe(gulp.dest("lib"));
 }
 
@@ -46,6 +35,12 @@ function bundle(w, cb) {
     packageCache: {},
   });
   bundle.add(require.resolve("./lib/client/index.js"));
+  bundle.transform(babelify.configure({
+		presets:["es2015"],
+		extensions:[".js"],
+    plugins:["syntax-async-functions","transform-regenerator"],
+		babelrc:false,
+	}),{global:true})
   if (w) bundle.plugin(watchify);
 
   function doBundle() {

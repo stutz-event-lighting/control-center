@@ -1,2 +1,2 @@
 [*.jade]
-indent_style = tab
+indent_style = space

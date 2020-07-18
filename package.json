@@ -10,6 +10,7 @@
   "license": "proprietary",
   "dependencies": {
     "babel-polyfill": "^6.16.0",
+    "babelify": "^7.3.0",
     "bootstrap": "^3.4.1",
     "byline": "^4.2.1",
     "co-body": "^4.0.0",
