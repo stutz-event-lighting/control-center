@@ -1,7 +1,6 @@
 var async = require("async");
 var Device = require("../device.js");
-var hue = require("node-hue-api");
-var pify = require("pify");
+var hue = require("node-hue-api").v3;
 
 class OfficeLight extends Device{
     constructor(user){
@@ -9,18 +8,23 @@ class OfficeLight extends Device{
         this.user = user;
         this.set("scenes",[]);
         this.api = {scenes:function(){},updateScene:function(){},createScene:function(){}}
-        this.init();
+        this.init().catch(e=>{
+          console.error(e)
+        });
     }
 
     async init(){
-        var results = await pify(hue.nupnpSearch.bind(hue))()
-        if(!results.length) return;
-    	this.api = new hue.HueApi(results[0].ipaddress,this.user);
+      console.log("searching for hue controllers...");
+      var results = await hue.discovery.nupnpSearch();
+      console.log("found hue controllers:",results);
+      if(!results.length) return;
+    	this.api = await hue.api.createLocal(results[0].ipaddress).connect(this.user);
+      console.log("connected to hue");
     	await this.updateScenes();
     }
 
     async updateScenes(){
-        var scenes = await pify(this.api.scenes.bind(this.api))();
+        var scenes = await this.api.scenes();
         this.set("scenes",scenes
             .filter((scene)=>scene.name.indexOf("boxify-") == 0)
             .map((scene)=>({id:scene.id,name:scene.name.substr(7)}))
@@ -36,9 +40,9 @@ class OfficeLight extends Device{
             }
         }
         if(id){
-            await pify(this.api.updateScene.bind(this.api))(id,[1,2,3,4,5,6,7,8,9],"boxify-"+name);
+            await this.api.updateScene(id,[1,2,3,4,5,6,7,8,9],"boxify-"+name);
         }else{
-            await pify(this.api.createScene.bind(this.api))([1,2,3,4,5,6,7,8,9],"boxify-"+name);
+            await this.api.createScene([1,2,3,4,5,6,7,8,9],"boxify-"+name);
         }
         this.updateScenes();
     }
@@ -58,7 +62,7 @@ class OfficeLight extends Device{
     }
 
     async deleteScene(id){
-        await pify(this.api.updateScene.bind(this.api))(id,[1,2,3,4,5,6,7,8,9],"boxify");
+        await this.api.updateScene(id,[1,2,3,4,5,6,7,8,9],"boxify");
         this.updateScenes();
     }
 }
