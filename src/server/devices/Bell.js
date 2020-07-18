@@ -2,7 +2,6 @@ var Device = require("../device.js");
 var sonos = require("sonos");
 var entities = new (require("html-entities").XmlEntities)();
 var sleep = require("sleep.async");
-var pify = require("pify");
 
 class Bell extends Device{
     constructor(outdoorlight,url){
@@ -13,10 +12,10 @@ class Bell extends Device{
 
     async getDevice(){
         return await new Promise((s)=>{
-            sonos.search(async function(device){
+            sonos.DeviceDiscovery(async function(device){
                 device = new sonos.Sonos(device.host);
-                var topo = await pify(device.getTopology.bind(device))();
-                if(topo.zones.filter((t)=>t.coordinator=="true")[0].location.indexOf(device.host)>=0) s(device);
+                var groups = await device.getAllGroups();
+                if(groups.filter(g=>g.host == device.host).length) s(device);
             })
         });
     }
@@ -27,20 +26,21 @@ class Bell extends Device{
         var av = new sonos.Services.AVTransport(device.host);
 
         var [volume,state,mediaInfo] = await Promise.all([
-            pify(device.getVolume.bind(device))(),
-            pify(device.getCurrentState.bind(device))(),
-            pify(av.GetMediaInfo.bind(av))({InstanceID:0})
+            device.getVolume(),
+            device.getCurrentState(),
+            av.GetMediaInfo({InstanceID:0})
         ])
-        await pify(device.play.bind(device))(url);
-        await pify(device.setVolume.bind(device))(50);
+        console.log(volume,state,av)
+        await device.play(url);
+        await device.setVolume(50);
         await sleep(3000);
 
-        await pify(device.setVolume.bind(device))(volume);
+        await device.setVolume(volume);
         await sleep(1000);
-        await pify(av.SetAVTransportURI.bind(av))({InstanceID:0,CurrentURI:entities.encode(mediaInfo.CurrentURI),CurrentURIMetaData:entities.encode(mediaInfo.CurrentURIMetaData)});
+        await av.SetAVTransportURI({InstanceID:0,CurrentURI:entities.encode(mediaInfo.CurrentURI),CurrentURIMetaData:entities.encode(mediaInfo.CurrentURIMetaData)});
         if(state != "playing") return;
 
-        await pify(device.play.bind(device))();
+        await device.play();
     }
 
     async light(){
