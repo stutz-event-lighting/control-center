@@ -42,7 +42,7 @@
     "sonos": "^1.13.2",
     "suncalc": "^1.6.0",
     "whatwg-fetch": "^3.2.0",
-    "ws": "^7.3.1"
+    "ws": "^7.4.6"
   },
   "devDependencies": {
     "babel-plugin-syntax-async-functions": "^6.13.0",
