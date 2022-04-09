@@ -28,7 +28,7 @@
     "koa-send": "^5.0.1",
     "koa-static": "^3.0.0",
     "koa-upgrade": "^1.0.1",
-    "moment": "^2.14.1",
+    "moment": "^2.29.2",
     "mongoose": "^4.13.20",
     "node-hue-api": "^4.0.7",
     "pify": "^2.3.0",
