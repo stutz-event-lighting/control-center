@@ -160,13 +160,13 @@ script(section="body").
     }
 
     lockDoors(){
-        if(client.hasPermission("innerdoor")) this.client.devices.innerdoor.setAutoLock(true);
-        if(client.hasPermission("outerdoor")) this.client.devices.outerdoor.setAutoLock(true);
+        if(this.client.hasPermission("innerdoor")) this.client.devices.innerdoor.setAutoLock(true);
+        if(this.client.hasPermission("outerdoor")) this.client.devices.outerdoor.setAutoLock(true);
     }
 
     unlockDoors(){
-        if(client.hasPermission("innerdoor")) this.client.devices.innerdoor.setAutoLock(false);
-        if(client.hasPermission("outerdoor")) this.client.devices.outerdoor.setAutoLock(false);
+        if(this.client.hasPermission("innerdoor")) this.client.devices.innerdoor.setAutoLock(false);
+        if(this.client.hasPermission("outerdoor")) this.client.devices.outerdoor.setAutoLock(false);
     }
 
     bellRing(){
