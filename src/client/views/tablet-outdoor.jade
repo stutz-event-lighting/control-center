@@ -55,20 +55,16 @@ div
         if this.state.pin.full
             .col-xs-12
                 h1= "Willkommen, "+this.state.pin.name
-            .col-xs-3
+            .col-xs-4
                 h1 Tor
                 .btn.btn-primary(onTouchStart=this.openGate.bind(this)) Öffnen
                 .btn.btn-primary(onTouchStart=this.stopGate.bind(this)) Stoppen
                 .btn.btn-primary(onTouchStart=this.closeGate.bind(this)) Schliessen
-            .col-xs-3
+            .col-xs-4
                 h1 Aussenlicht
                 .btn.btn-success(onTouchStart=this.outdoorlightOn.bind(this)) An
                 .btn.btn-success(onTouchStart=this.outdoorlightOff.bind(this)) Aus
-            .col-xs-3
-                h1 Türen
-                .btn.btn-warning(onClick=this.lockDoors.bind(this)) Verriegeln
-                .btn.btn-warning(onClick=this.unlockDoors.bind(this)) Entriegeln
-            .col-xs-3
+            .col-xs-4
                 h1 Feierabend
                 .btn.btn-danger(onClick=this.allOff.bind(this)) Go Home
         else
@@ -157,16 +153,6 @@ script(section="body").
     closePinError(){
         delete this.state.showPinError;
         this.forceUpdate();
-    }
-
-    lockDoors(){
-        if(this.client.hasPermission("innerdoor")) this.client.devices.innerdoor.setAutoLock(true);
-        if(this.client.hasPermission("outerdoor")) this.client.devices.outerdoor.setAutoLock(true);
-    }
-
-    unlockDoors(){
-        if(this.client.hasPermission("innerdoor")) this.client.devices.innerdoor.setAutoLock(false);
-        if(this.client.hasPermission("outerdoor")) this.client.devices.outerdoor.setAutoLock(false);
     }
 
     bellRing(){
